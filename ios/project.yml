@@ -18,23 +18,50 @@ targets:
   MikaIOS:
     type: application
     platform: iOS
-    sources: [MikaIOS]
+    sources: [MikaIOS, Shared]
     info:
       path: MikaIOS/Info.plist
       properties:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         CFBundleDisplayName: Mika
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.huapohen.mikaremote
+            CFBundleURLSchemes: [mikarea]
         NSLocalNetworkUsageDescription: 连接局域网中的 Mika 安卓设备。
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         DEVELOPMENT_TEAM: RQHK3ZN3W7
         CODE_SIGN_STYLE: Automatic
         SWIFT_VERSION: '5.0'
         "OTHER_LDFLAGS[sdk=iphoneos*]": "$(inherited) -L$(PROJECT_DIR)/Native -lmika_local_control -framework Security -framework SystemConfiguration -lresolv"
+    dependencies:
+      - target: MikaLiveWidget
+        embed: true
+  MikaLiveWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: '16.2'
+    sources: [MikaLiveWidget, Shared]
+    info:
+      path: MikaLiveWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Mika 胶囊
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote.capsule
+        DEVELOPMENT_TEAM: RQHK3ZN3W7
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: '5.0'
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
   DeviceControlTests:
     type: bundle.ui-testing
     platform: iOS

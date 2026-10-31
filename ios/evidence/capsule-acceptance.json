@@ -1,0 +1,41 @@
+{
+  "device": "iPhone 15 Pro",
+  "os": "iOS 26.6.2",
+  "date": "2026-10-31",
+  "real_device_checks": {
+    "expand_and_input": true,
+    "collapse_and_touch_underlying_toolbar": true,
+    "off_and_always_modes": true,
+    "drag_to_opposite_edge": true,
+    "live_activity_start": true,
+    "home_screen_dynamic_island_expand": true,
+    "system_stop_intent_received": true,
+    "activity_end_confirmed": true,
+    "main_navigation_and_input_regression": true
+  },
+  "unit_checks": {
+    "cancel_in_flight_model_request": true,
+    "stale_stop_does_not_cancel_current_task": true,
+    "remote_restart_recovery": true,
+    "uncertain_submission_does_not_retry": true
+  },
+  "signing": "existing Personal Team; local Live Activities, no push notifications",
+  "scope": "draggable capsule inside Mika; Live Activity on Dynamic Island and Lock Screen; not an Android-style arbitrary cross-app overlay",
+  "privacy": "system content contains generic status only; no prompts, keys or screen text",
+  "installed_runtime": {
+    "bubble_visible": true,
+    "system_activity_count": 1,
+    "system_phase": "ready",
+    "system_status": "系统胶囊已显示",
+    "timestamp": "2026-10-31T08:21:29Z"
+  },
+  "on_device_agent_regression": {
+    "timestamp": "2026-10-31T08:21:29Z",
+    "targets": [
+      "launch_app:com.nebula.clashmi",
+      "read_screen:com.nebula.clashmi",
+      "launch_app:com.huapohen.mikaremote"
+    ],
+    "installed_clashmi_version_verified": true
+  }
+}

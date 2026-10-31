@@ -8,6 +8,7 @@ extension Color {
 struct ContentView: View {
     @StateObject private var model = Model()
     @ObservedObject private var localControl = OnDeviceControl.shared
+    @Environment(\.scenePhase) private var scenePhase
     @State private var input = ""
     @State private var drawer = false
     @State private var destination: String?
@@ -43,7 +44,7 @@ struct ContentView: View {
                                             .clipShape(RoundedRectangle(cornerRadius:18))
                                     }.frame(maxWidth:.infinity,alignment:message.role == "user" ? .trailing : .leading).id(message.id)
                                 }
-                                if model.busy { HStack(spacing:10) { ProgressView(); Text("Mika 正在处理…").font(.subheadline).foregroundStyle(.secondary) } }
+                                if model.busy { HStack(spacing:10) { ProgressView(); Text(model.mode=="iPhone" ? model.localProgress : "Mika 正在处理…").font(.subheadline).foregroundStyle(.secondary);Spacer();if model.remoteTask==nil,model.mode=="iPhone" {Button("停止") {Task {await model.stopWork(expectedID:model.capsuleOperationID)}}} } }
                             }.padding(20)
                         }.scrollDismissesKeyboard(.interactively)
                             .onChange(of:model.messages.count) { _ in if let id=model.messages.last?.id { withAnimation { proxy.scrollTo(id,anchor:.bottom) } } }
@@ -61,10 +62,21 @@ struct ContentView: View {
                 sidebar.frame(width:300).background(Color(uiColor:.systemBackground)).transition(.move(edge:.leading))
             }
         }.tint(.mikaBlue)
+            .onAppear {MikaCapsuleCoordinator.shared.bind(model)}
+            .onChange(of:scenePhase) {phase in MikaCapsuleCoordinator.shared.setForeground(phase == .active)}
+            .onReceive(NotificationCenter.default.publisher(for:.mikaCapsuleRoute)) {notification in
+                drawer=false
+                switch notification.object as? String {case "capsule":destination="悬浮胶囊";case "local":destination="本机控制";default:destination=nil}
+            }
+            .onOpenURL {url in if url.scheme=="mikarea" {MikaCapsuleCoordinator.shared.route(url.host ?? "task")}}
             .confirmationDialog("解除任务关联",isPresented:$detachingTask,titleVisibility:.visible) {
                 Button("仅解除本机关联",role:.destructive) {model.detachTask()}
             } message:{Text("目标设备上的任务可能继续执行。你可以在连接页查看并接回任务。")}
             .task {
+                MikaCapsuleCoordinator.shared.bind(model)
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--mika-capsule-live-preview") {MikaCapsuleCoordinator.shared.preview()}
+                #endif
                 await localControl.runDeveloperProbeIfRequested()
                 #if DEBUG
                 if localControl.ready,ProcessInfo.processInfo.arguments.contains("--mika-local-agent-probe") {
@@ -141,6 +153,8 @@ struct ContentView: View {
     @ViewBuilder private func routeView(_ route:String)->some View {
         switch route {
         case "设置": SettingsHome(model:model)
+        case "悬浮胶囊": CapsuleSettings()
+        case "本机控制": LocalControlSetup()
         case "连接设备": ConnectionSettings(model:model)
         case "浏览器": BrowserView(model:model)
         default: List {Section {Text("Mika").font(.largeTitle.bold());Text("iPhone 伴侣 · 开发版");Text("基于 Mika 实现原生对话、iPhone 本机控制与安卓远程任务。本地隧道基于 LocalDevVPN；合并代理使用 Mihomo 内核，并参考 Clash Mi。")};Section("项目") {Link("Mika 源码",destination:URL(string:"https://github.com/wangzan101/Mika")!);Link("REA",destination:URL(string:"https://github.com/morluto/rea")!);Link("Clash Mi（GPL-3.0）",destination:URL(string:"https://github.com/KaringX/clashmi")!);Link("Mihomo 内核（GPL-3.0）",destination:URL(string:"https://github.com/MetaCubeX/mihomo/tree/Meta")!);Link("本地隧道参考：LocalDevVPN（SideStore Team）",destination:URL(string:"https://github.com/jkcoxson/LocalDevVPN")!)} }.navigationTitle("关于 Mika")

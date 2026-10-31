@@ -11,15 +11,25 @@
 		1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */; };
 		26BC92875721008821E6AB73 /* LocalControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */; };
 		38AAF0DF13AB1D16AA877663 /* LocalPhoneAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */; };
+		3E1546CD56657AAE40BFC2F4 /* MikaCapsule.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1A31B3BF791CC717E70902 /* MikaCapsule.swift */; };
+		3E2A5DD78B2C17508DFF983F /* MikaActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */; };
+		48F03F127BAC52C2663C8F35 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 12176BDCF4AD9E4EEE1ED75B /* Assets.xcassets */; };
+		4D3A5BE249627709B01DA274 /* CapsuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAD34B48B3A419910B29423 /* CapsuleTests.swift */; };
 		567965943C28B85EFE35555F /* LocalControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */; };
 		5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA7737935650160E9074D2C /* ContentView.swift */; };
 		5E2EE0B9F35A5F30FDA0088D /* TaskRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE874FCBD5EAD8D38167222 /* TaskRecoveryTests.swift */; };
+		7D3629FF97A6BAC9975C8290 /* MikaActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */; };
 		80C5F3C468FF308A4DBD71F6 /* OnDeviceControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55A9D9601B0CAFBDA3883E9 /* OnDeviceControl.swift */; };
+		86B1D0210AB11AFBA1CB5D56 /* MikaLiveActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4565181B3F088D659A9042 /* MikaLiveActions.swift */; };
 		898335DB885DB87A2E2FB071 /* LocalControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */; };
+		89E1A169008097C697F90CF1 /* MikaLiveWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2326E3A118943605C3D25C61 /* MikaLiveWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B123AD415F9D1AFEE90F09AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 12176BDCF4AD9E4EEE1ED75B /* Assets.xcassets */; };
+		B2927EDE86C17DA9425F1C0C /* MikaLiveActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4565181B3F088D659A9042 /* MikaLiveActions.swift */; };
 		BD435E741A907984B88A8C15 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A933D9593A6437B6F840205 /* SettingsView.swift */; };
 		CF0F21C5ED14ADC9D65DC5E0 /* MikaTunnelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */; };
 		D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F484000F83A498BEFACD5A7C /* BrowserView.swift */; };
 		D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80664ECF799D8E00D9FFB99 /* Model.swift */; };
+		E5919C2C00587145A2FB6E14 /* MikaLiveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331B130A53FF62D48066D613 /* MikaLiveWidget.swift */; };
 		F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD1BC73166688166B30AD8A /* MikaIOS.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,11 +55,36 @@
 			remoteGlobalIDString = F35629DC352BDFA7A5C48925;
 			remoteInfo = MikaIOS;
 		};
+		DA25BBFCBC3BEBB7C3EAD905 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 78F747EE28E72F9C09EF3D19 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5ECA29ABA3C662026262E630;
+			remoteInfo = MikaLiveWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3372E2EB53D1A3309EAE0D91 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				89E1A169008097C697F90CF1 /* MikaLiveWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0DA7737935650160E9074D2C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		12176BDCF4AD9E4EEE1ED75B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1243F80671E9D0ACE3B43F70 /* MikaUnitTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MikaUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2326E3A118943605C3D25C61 /* MikaLiveWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MikaLiveWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		331B130A53FF62D48066D613 /* MikaLiveWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaLiveWidget.swift; sourceTree = "<group>"; };
+		3F0F66C786162CE647F9B463 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4A933D9593A6437B6F840205 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		518BD0605CE458C6DF4C6BBF /* MCPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPClient.swift; sourceTree = "<group>"; };
 		54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceControlTests.swift; sourceTree = "<group>"; };
@@ -57,15 +92,19 @@
 		682FDFA64E43727CB37D3529 /* MikaIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MikaIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6DD1BC73166688166B30AD8A /* MikaIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaIOS.swift; sourceTree = "<group>"; };
 		802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LocalControlRunner.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D4565181B3F088D659A9042 /* MikaLiveActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaLiveActions.swift; sourceTree = "<group>"; };
 		A171E7F91F76B55193D8ACE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlTests.swift; sourceTree = "<group>"; };
+		BD1A31B3BF791CC717E70902 /* MikaCapsule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaCapsule.swift; sourceTree = "<group>"; };
 		C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlServer.swift; sourceTree = "<group>"; };
+		CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaActivityAttributes.swift; sourceTree = "<group>"; };
 		D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DeviceControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3B67A7287FAF50C316BC859 /* Network.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Network.entitlements; sourceTree = "<group>"; };
 		DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPhoneAgent.swift; sourceTree = "<group>"; };
 		E80664ECF799D8E00D9FFB99 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		F484000F83A498BEFACD5A7C /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
 		F55A9D9601B0CAFBDA3883E9 /* OnDeviceControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceControl.swift; sourceTree = "<group>"; };
+		FDAD34B48B3A419910B29423 /* CapsuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapsuleTests.swift; sourceTree = "<group>"; };
 		FEE874FCBD5EAD8D38167222 /* TaskRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskRecoveryTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,6 +115,7 @@
 				D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */,
 				802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */,
 				682FDFA64E43727CB37D3529 /* MikaIOS.app */,
+				2326E3A118943605C3D25C61 /* MikaLiveWidget.appex */,
 				1243F80671E9D0ACE3B43F70 /* MikaUnitTests.xctest */,
 			);
 			name = Products;
@@ -87,7 +127,9 @@
 				F4464F981BDDDC9B030640F7 /* DeviceControlTests */,
 				5625BD8153E57A0617301C61 /* LocalControlRunner */,
 				D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */,
+				8874C6E9856184E6DF6490F1 /* MikaLiveWidget */,
 				990F1D00FD8C566B6CF3B1AB /* MikaUnitTests */,
+				98B094F3C9F7A92F691718EF /* Shared */,
 				15B745F43DAE8A97A408B788 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,6 +140,25 @@
 				B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */,
 			);
 			path = LocalControlRunner;
+			sourceTree = "<group>";
+		};
+		8874C6E9856184E6DF6490F1 /* MikaLiveWidget */ = {
+			isa = PBXGroup;
+			children = (
+				3F0F66C786162CE647F9B463 /* Info.plist */,
+				331B130A53FF62D48066D613 /* MikaLiveWidget.swift */,
+			);
+			path = MikaLiveWidget;
+			sourceTree = "<group>";
+		};
+		98B094F3C9F7A92F691718EF /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				12176BDCF4AD9E4EEE1ED75B /* Assets.xcassets */,
+				CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */,
+				8D4565181B3F088D659A9042 /* MikaLiveActions.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		990F1D00FD8C566B6CF3B1AB /* MikaUnitTests */ = {
@@ -116,6 +177,7 @@
 				A171E7F91F76B55193D8ACE1 /* Info.plist */,
 				DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */,
 				518BD0605CE458C6DF4C6BBF /* MCPClient.swift */,
+				BD1A31B3BF791CC717E70902 /* MikaCapsule.swift */,
 				6DD1BC73166688166B30AD8A /* MikaIOS.swift */,
 				5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */,
 				E80664ECF799D8E00D9FFB99 /* Model.swift */,
@@ -129,6 +191,7 @@
 		F4464F981BDDDC9B030640F7 /* DeviceControlTests */ = {
 			isa = PBXGroup;
 			children = (
+				FDAD34B48B3A419910B29423 /* CapsuleTests.swift */,
 				54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */,
 				C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */,
 			);
@@ -155,6 +218,24 @@
 			productName = LocalControlRunner;
 			productReference = 802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		5ECA29ABA3C662026262E630 /* MikaLiveWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7BC09BDD29080527B84FF595 /* Build configuration list for PBXNativeTarget "MikaLiveWidget" */;
+			buildPhases = (
+				34EBAF26DA36E32CA4A9C195 /* Sources */,
+				57E390305559B8B734466072 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MikaLiveWidget;
+			packageProductDependencies = (
+			);
+			productName = MikaLiveWidget;
+			productReference = 2326E3A118943605C3D25C61 /* MikaLiveWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		9A058AB8F72C577628036721 /* MikaUnitTests */ = {
 			isa = PBXNativeTarget;
@@ -197,10 +278,13 @@
 			buildConfigurationList = 11D4E9C941E56865FB647E3F /* Build configuration list for PBXNativeTarget "MikaIOS" */;
 			buildPhases = (
 				8D17DB8DC88DD90E9ACF46AE /* Sources */,
+				471957E9580BCD8DB0A4FFD9 /* Resources */,
+				3372E2EB53D1A3309EAE0D91 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				959152121BDB69A7C8C96118 /* PBXTargetDependency */,
 			);
 			name = MikaIOS;
 			packageProductDependencies = (
@@ -222,6 +306,10 @@
 						DevelopmentTeam = RQHK3ZN3W7;
 						ProvisioningStyle = Automatic;
 						TestTargetID = F35629DC352BDFA7A5C48925;
+					};
+					5ECA29ABA3C662026262E630 = {
+						DevelopmentTeam = RQHK3ZN3W7;
+						ProvisioningStyle = Automatic;
 					};
 					CF6BB9B2A23992E7F43F187B = {
 						DevelopmentTeam = RQHK3ZN3W7;
@@ -250,13 +338,43 @@
 			targets = (
 				9A058AB8F72C577628036721 /* MikaUnitTests */,
 				F35629DC352BDFA7A5C48925 /* MikaIOS */,
+				5ECA29ABA3C662026262E630 /* MikaLiveWidget */,
 				CF6BB9B2A23992E7F43F187B /* DeviceControlTests */,
 				0FE307CB4E0EE85E487FB56B /* LocalControlRunner */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		471957E9580BCD8DB0A4FFD9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48F03F127BAC52C2663C8F35 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		57E390305559B8B734466072 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B123AD415F9D1AFEE90F09AD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		34EBAF26DA36E32CA4A9C195 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E2A5DD78B2C17508DFF983F /* MikaActivityAttributes.swift in Sources */,
+				B2927EDE86C17DA9425F1C0C /* MikaLiveActions.swift in Sources */,
+				E5919C2C00587145A2FB6E14 /* MikaLiveWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7C66A090242A794FABABB935 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -273,7 +391,10 @@
 				5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */,
 				38AAF0DF13AB1D16AA877663 /* LocalPhoneAgent.swift in Sources */,
 				0433E2A937CD9CE442194A9D /* MCPClient.swift in Sources */,
+				7D3629FF97A6BAC9975C8290 /* MikaActivityAttributes.swift in Sources */,
+				3E1546CD56657AAE40BFC2F4 /* MikaCapsule.swift in Sources */,
 				F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */,
+				86B1D0210AB11AFBA1CB5D56 /* MikaLiveActions.swift in Sources */,
 				CF0F21C5ED14ADC9D65DC5E0 /* MikaTunnelManager.swift in Sources */,
 				D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */,
 				80C5F3C468FF308A4DBD71F6 /* OnDeviceControl.swift in Sources */,
@@ -294,6 +415,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D3A5BE249627709B01DA274 /* CapsuleTests.swift in Sources */,
 				1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */,
 				26BC92875721008821E6AB73 /* LocalControlServer.swift in Sources */,
 			);
@@ -306,6 +428,11 @@
 			isa = PBXTargetDependency;
 			target = F35629DC352BDFA7A5C48925 /* MikaIOS */;
 			targetProxy = 94553ED3F5B6D918F6559CEA /* PBXContainerItemProxy */;
+		};
+		959152121BDB69A7C8C96118 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5ECA29ABA3C662026262E630 /* MikaLiveWidget */;
+			targetProxy = DA25BBFCBC3BEBB7C3EAD905 /* PBXContainerItemProxy */;
 		};
 		B5721F2FA2E91B4FD7BEB3B1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -320,6 +447,27 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0BFDFAC79EFC9887C83A1A7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				INFOPLIST_FILE = MikaLiveWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote.capsule;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		0FBCC57280992F53DBEFB98A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -341,7 +489,7 @@
 		10B180A74A04C71C17770CF3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RQHK3ZN3W7;
@@ -396,6 +544,27 @@
 				TEST_TARGET_NAME = MikaIOS;
 			};
 			name = Release;
+		};
+		3BACC36F283554F7EC7D9921 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				INFOPLIST_FILE = MikaLiveWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote.capsule;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		7B36CC9C668E43FB7261CEB4 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -576,7 +745,7 @@
 		F540C1E938CB367925BC79AC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RQHK3ZN3W7;
@@ -619,6 +788,15 @@
 			buildConfigurations = (
 				1C9E426EC39F674148D613F0 /* Debug */,
 				EF1D0ADDE4628AC21B57B40F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7BC09BDD29080527B84FF595 /* Build configuration list for PBXNativeTarget "MikaLiveWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BACC36F283554F7EC7D9921 /* Debug */,
+				0BFDFAC79EFC9887C83A1A7B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

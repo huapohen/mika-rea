@@ -16,6 +16,7 @@ import UniformTypeIdentifiers
     @Published private(set) var detail="开启本机控制后，Mika 才能读屏和操作其他 App。" {didSet {saveDiagnostics()}}
     @Published private(set) var hasPairing=false
     @Published private(set) var starting=false
+    @Published private(set) var sessionIdentifier=""
     @Published var host=UserDefaults.standard.string(forKey:"localDeviceHost") ?? "10.7.0.1" {didSet {UserDefaults.standard.set(host,forKey:"localDeviceHost")}}
     private var monitor:Task<Void,Never>?
     private var health:Task<Void,Never>?
@@ -96,6 +97,7 @@ import UniformTypeIdentifiers
         phase="需要真机";detail="本机开发服务需要在实际 iPhone 上验证。"
         #else
         credential=UUID().uuidString+UUID().uuidString
+        sessionIdentifier=UUID().uuidString
         guard Secret.set("local-control-session",credential) else {detail="无法保存会话令牌，请先解锁设备。";return}
         let result=pairURL.path.withCString {pair in host.withCString {address in runner.withCString {identifier in credential.withCString {token in nativeStart(pair,address,identifier,token)}}}}
         guard result>=0 else {phase="配置无效";detail="请检查本机开发地址。";return}
@@ -137,6 +139,7 @@ import UniformTypeIdentifiers
         #endif
         MikaTunnelManager.shared.stop()
         ready=false;starting=false;phase="已停止";detail="本机自动化会话已停止。"
+        sessionIdentifier=""
         credential="";Secret.set("local-control-session","")
     }
     private func watchSession() {

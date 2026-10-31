@@ -1,6 +1,7 @@
 import SwiftUI
 struct SettingsHome: View {
     @ObservedObject var model: Model
+    @ObservedObject private var capsule=MikaCapsuleCoordinator.shared
     var body: some View {
         List {
             Section {
@@ -8,6 +9,7 @@ struct SettingsHome: View {
             }
             Section("基本") {
                 NavigationLink { LocalControlSetup() } label: { setting("本机控制","hand.tap",OnDeviceControl.shared.phase) }.accessibilityIdentifier("settingsLocalControl")
+                NavigationLink { CapsuleSettings() } label: { setting("悬浮胶囊","bubble.left.and.bubble.right",capsule.mode=="off" ? "关闭" : "已开启") }.accessibilityIdentifier("settingsCapsule")
                 NavigationLink { ModelSettings(model:model) } label: { setting("模型","cpu",model.model) }.accessibilityIdentifier("settingsModels")
                 NavigationLink { ConnectionSettings(model:model) } label: { setting("手机操作","iphone",model.mode == "安卓" ? model.transport : "本机助手") }
                 NavigationLink { BrowserView(model:model) } label: { setting("浏览器","globe","") }
@@ -16,7 +18,7 @@ struct SettingsHome: View {
                 NavigationLink { List {Section("存储") {Text("API Key 和配对令牌保存在本机钥匙串；对话保存在本机应用目录。模型请求直接发给你配置的服务商。")};Section("阅读内容") {Text("网页或文件只在你主动读取后附加到后续模型请求，可在输入栏上方移除。")} }.navigationTitle("数据与隐私") } label: { setting("数据与隐私","lock.shield","") }
                 NavigationLink { List {ForEach(model.chats) { chat in VStack(alignment:.leading,spacing:5) {Text(chat.title);Text("\(chat.messages.count) 条消息").font(.caption).foregroundStyle(.secondary)} }}.navigationTitle("对话记录") } label: {setting("对话记录","bubble.left.and.bubble.right","\(model.chats.count)")}
             }
-            Section("关于") {Text("Mika iPhone · 开发版");Text("界面参考 Android Mika。当前受控端支持安卓 Mika；iPhone 跨 App 受控尚不可用。").font(.footnote).foregroundStyle(.secondary)}
+            Section("关于") {Text("Mika iPhone · 开发版");Text("支持已验证的 iPhone 本机 App 操作和安卓远程任务。悬浮入口采用应用内胶囊、灵动岛与锁屏实时活动。").font(.footnote).foregroundStyle(.secondary)}
         }.navigationTitle("设置").navigationBarTitleDisplayMode(.inline)
     }
     private func setting(_ title:String,_ icon:String,_ value:String)->some View {HStack(spacing:14) {Image(systemName:icon).foregroundStyle(.secondary).frame(width:30,height:38);Text(title);Spacer();Text(value).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)}}
