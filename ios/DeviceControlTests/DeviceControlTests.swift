@@ -21,6 +21,19 @@ final class DeviceControlTests: XCTestCase {
         XCTAssertTrue(app.buttons["发送"].isEnabled)
         XCTAssertTrue(String(describing:input.value ?? "").contains("UI input test"))
     }
+    func testConfiguredProvider() throws {
+        let app = XCUIApplication(bundleIdentifier:"com.huapohen.mikaremote")
+        app.launch()
+        XCTAssertTrue(app.buttons["菜单"].waitForExistence(timeout:15))
+        app.buttons["菜单"].tap()
+        app.buttons["设置"].tap()
+        app.descendants(matching:.any).matching(identifier:"settingsModels").firstMatch.tap()
+        let test=app.buttons["测试连接"]
+        XCTAssertTrue(test.waitForExistence(timeout:5))
+        XCTAssertTrue(test.isEnabled)
+        test.tap()
+        XCTAssertTrue(app.staticTexts["已连接 · 主模型可用"].waitForExistence(timeout:30))
+    }
     func testRelayAndroid() throws {
         let app = XCUIApplication(bundleIdentifier: "com.huapohen.mikaremote")
         app.launch()

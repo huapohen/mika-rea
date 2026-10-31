@@ -41,8 +41,13 @@ struct ChatRecord: Identifiable, Codable { var id: String; var title: String; va
         if let data=try? Data(contentsOf:historyURL),let saved=try? JSONDecoder().decode([ChatRecord].self,from:data) {chats=saved;messages=saved.first(where:{$0.id == selectedChat})?.messages ?? []}
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("bootstrap.json")
         if let data = try? Data(contentsOf:url), let config = try? JSONSerialization.jsonObject(with:data) as? [String:String] {
-            if let v=config["relay"] { relayURL=v }; if let v=config["device"] { deviceID=v }; if let v=config["client_token"] { relayToken=v; Secret.set("relay",v) }
-            transport="中继"; mode="安卓"; try? FileManager.default.removeItem(at:url)
+            if let v=config["relay"] { relayURL=v; transport="中继"; mode="安卓" }
+            if let v=config["device"] { deviceID=v }
+            if let v=config["client_token"] { relayToken=v; Secret.set("relay",v) }
+            if let v=config["provider_base"] { base=v }
+            if let v=config["provider_model"] { model=v }
+            if let v=config["provider_api_key"], !v.isEmpty { apiKey=v; Secret.set("api",v); mode="iPhone" }
+            try? FileManager.default.removeItem(at:url)
         }
     }
     @Published var apiKey = Secret.get("api") { didSet { Secret.set("api",apiKey) } }
