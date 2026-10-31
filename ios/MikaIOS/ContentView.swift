@@ -28,9 +28,10 @@ struct ContentView: View {
             NavigationStack {
                 VStack(spacing:0) {
                     HStack(spacing:8) {
-                        Circle().fill(model.mode == "安卓" ? Color.mikaBlue : Color.green).frame(width:6,height:6)
-                        Text(model.remoteTask?.connection.label ?? (model.isRemote ? "\(model.targetLabel) · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手"))).font(.caption).foregroundStyle(.secondary)
+                        Circle().fill(model.isRemote ? Color.mikaBlue : localControl.ready ? Color.green : localControl.starting ? Color.orange : Color.gray).frame(width:6,height:6)
+                        Text(model.remoteTask?.connection.label ?? (model.isRemote ? "\(model.targetLabel) · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : localControl.starting ? "iPhone · 本机控制连接中" : "iPhone · 本机控制未连接"))).font(.caption).foregroundStyle(.secondary)
                         Spacer()
+                        if !model.isRemote,localControl.requested,!localControl.ready,!localControl.starting {Button("重连") {localControl.start()}.font(.caption).accessibilityIdentifier("reconnectLocalControl")}
                         Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" };Button("远程 iPhone 助手") {model.mode="远程 iPhone";model.transport="中继"} } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备").disabled(model.receivingRemoteWork || model.busy || !model.taskID.isEmpty)
                     }.padding(.horizontal,22)
                     if receiver.enabled || receiver.activeTask != nil {
@@ -67,7 +68,7 @@ struct ContentView: View {
             }
         }.tint(.mikaBlue)
             .onAppear {receiver.bind(model);MikaCapsuleCoordinator.shared.bind(model)}
-            .onChange(of:scenePhase) {phase in MikaCapsuleCoordinator.shared.setForeground(phase == .active);receiver.setForeground(phase == .active)}
+            .onChange(of:scenePhase) {phase in MikaCapsuleCoordinator.shared.setForeground(phase == .active);receiver.setForeground(phase == .active);if phase == .active {localControl.restoreIfRequested()}}
             .onReceive(NotificationCenter.default.publisher(for:.mikaCapsuleRoute)) {notification in
                 drawer=false
                 switch notification.object as? String {case "capsule":destination="悬浮胶囊";case "local":destination="本机控制";case "receiver":destination="接收远程协助";default:destination=receiver.activeTask == nil ? nil : "接收远程协助"}
@@ -78,6 +79,7 @@ struct ContentView: View {
             } message:{Text("目标设备上的任务可能继续执行。你可以在连接页查看并接回任务。")}
             .task {
                 receiver.bind(model);MikaCapsuleCoordinator.shared.bind(model)
+                localControl.restoreIfRequested()
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--mika-capsule-live-preview") {MikaCapsuleCoordinator.shared.preview()}
                 #endif

@@ -42,7 +42,32 @@ private final class BlockingProviderProtocol:URLProtocol {
     override func startLoading() {Self.started?()}
     override func stopLoading() {Self.stopped?()}
 }
+@MainActor private final class UnavailablePhone:PhoneControlConnection {
+    var requested=true
+    var ready=false
+    func ensureReadyIfRequested() async throws {throw Model.Issue.message("本机执行器未连接，本次没有执行手机操作。")}
+}
 @MainActor final class TaskRecoveryTests:XCTestCase {
+    func testRequestedControlNeverFallsBackToAPlainChatDenial() async throws {
+        let directory=FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
+        defer {try? FileManager.default.removeItem(at:directory)}
+        let suite=UUID().uuidString;let defaults=UserDefaults(suiteName:suite)!
+        defer {defaults.removePersistentDomain(forName:suite)}
+        var requests=0;BlockingProviderProtocol.started={requests+=1}
+        let config=URLSessionConfiguration.ephemeral;config.protocolClasses=[BlockingProviderProtocol.self]
+        let model=Model(storage:directory,defaults:defaults,vault:MemoryVault(),providerSession:URLSession(configuration:config),phoneConnection:UnavailablePhone())
+        model.apiKey="unit-provider-placeholder"
+        await model.send("打开设置读取 iOS 版本")
+        XCTAssertEqual(requests,0);XCTAssertEqual(model.lastOutcome,"failed")
+        XCTAssertTrue(model.messages.last?.text.contains("本机执行器未连接")==true)
+    }
+    func testResumePolicyPreservesExplicitStopAndMigratesPriorSessions() {
+        XCTAssertTrue(PhoneControlResumePolicy.requested(saved:nil,hasPairing:true,hasPreviousSession:true))
+        XCTAssertFalse(PhoneControlResumePolicy.requested(saved:nil,hasPairing:true,hasPreviousSession:false))
+        XCTAssertFalse(PhoneControlResumePolicy.requested(saved:false,hasPairing:true,hasPreviousSession:true))
+        XCTAssertTrue(PhoneControlResumePolicy.requested(saved:true,hasPairing:true,hasPreviousSession:false))
+    }
     private func client()->MCPClient {
         let configuration=URLSessionConfiguration.ephemeral;configuration.protocolClasses=[StubProtocol.self]
         return MCPClient(session:URLSession(configuration:configuration))

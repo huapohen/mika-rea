@@ -308,7 +308,7 @@ private struct MikaCapsuleOverlay:View {
         VStack(alignment:.leading,spacing:14) {
             HStack {Image("MikaLogo").resizable().scaledToFit().frame(width:30,height:30);Text("Mika").font(.headline);Spacer();Button {coordinator.expanded=false} label:{Image(systemName:"xmark.circle.fill").foregroundStyle(.secondary)}.accessibilityLabel("收起胶囊")}
             Text(coordinator.state.headline).font(.title3.bold())
-            Text(coordinator.state.active ? (coordinator.currentModel?.taskProgress.isEmpty==false ? coordinator.currentModel!.taskProgress : coordinator.state.detail) : (coordinator.currentModel?.mode=="安卓" ? "任务将交给已配置的安卓 Mika" : (OnDeviceControl.shared.ready ? "本机控制已连接" : "本机控制未开启，可聊天或切换安卓助手"))).font(.subheadline).foregroundStyle(.secondary)
+            Text(coordinator.state.active ? (coordinator.currentModel?.taskProgress.isEmpty==false ? coordinator.currentModel!.taskProgress : coordinator.state.detail) : idleDetail).font(.subheadline).foregroundStyle(.secondary)
             if let item=coordinator.interaction {PhoneInteractionView(interaction:item,owner:coordinator.interactionOwner,showsInput:false) {text in try await coordinator.respond(text,expectedID:item.id)}.id(item.id)}
             else if let remote=coordinator.currentModel?.remoteTask,!remote.question.isEmpty {Text(remote.question).font(.subheadline).lineLimit(4)}
             if !coordinator.inputError.isEmpty {Text(coordinator.inputError).font(.caption).foregroundStyle(.red)}
@@ -323,6 +323,13 @@ private struct MikaCapsuleOverlay:View {
             HStack {Button("本机控制") {coordinator.route("local")};Spacer();Button("胶囊设置") {coordinator.route("capsule")}}
                 .font(.caption)
         }.padding(18).background(.regularMaterial,in:RoundedRectangle(cornerRadius:24)).shadow(color:.black.opacity(0.16),radius:20,y:8).accessibilityElement(children:.contain)
+    }
+    private var idleDetail:String {
+        if let model=coordinator.currentModel,model.isRemote {return "任务将交给已配置的"+model.targetLabel}
+        let control=OnDeviceControl.shared
+        if control.ready {return "本机控制已连接"}
+        if control.starting {return "正在连接本机执行器"}
+        return control.requested ? "本机控制未连接，请进入本机控制页重连" : "本机控制已关闭，可聊天或切换远程助手"
     }
 }
 

@@ -1,0 +1,45 @@
+{
+  "device": "iPhone 15 Pro / iOS 26.6.2",
+  "runtime": "phone-side RemotePairing/RSD/XCTest; no Mac driver",
+  "clash": {
+    "timestamp": "2026-10-31T10:57:36Z",
+    "result": "Clash Mi 1.0.31.1703; returned to Mika",
+    "presentation": {
+      "closed": true,
+      "continuous": true,
+      "counts": {
+        "background_commands": 12,
+        "budget_returns": 0,
+        "commands": 12,
+        "final_returns": 0,
+        "interaction_returns": 0,
+        "per_command_returns": 0
+      },
+      "expired": false,
+      "timestamp": "2026-10-31T10:57:36Z"
+    }
+  },
+  "unit_tests_passed": 21,
+  "limitations": [
+    "iOS finite background runtime; budget may require foreground return",
+    "5G-only local control remains unverified"
+  ],
+  "settings": {
+    "timestamp": "2026-10-31T10:58:29Z",
+    "result": "Entered General and About; read iOS 26.6.2; returned to Mika",
+    "presentation": {
+      "closed": true,
+      "continuous": true,
+      "counts": {
+        "background_commands": 7,
+        "budget_returns": 0,
+        "commands": 7,
+        "final_returns": 0,
+        "interaction_returns": 0,
+        "per_command_returns": 0
+      },
+      "expired": false,
+      "timestamp": "2026-10-31T10:58:29Z"
+    }
+  }
+}

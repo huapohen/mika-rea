@@ -25,7 +25,9 @@ fn run() -> Result<(), i32> {
     runtime.block_on(async {
         let mut mux = UsbmuxdConnection::default().await.map_err(|e| e.code())?;
         let record = mux.get_pair_record(&args[1]).await.map_err(|e| e.code())?;
-        let device = mux.get_device(&args[1]).await.map_err(|e| e.code())?;
+        let device = mux.get_devices().await.map_err(|e| e.code())?.into_iter()
+            .find(|d| d.udid == args[1] && d.connection_type == idevice::usbmuxd::Connection::Usb)
+            .ok_or(-7)?;
         let provider = device.to_provider(UsbmuxdAddr::default(), "Mika USB Provisioning");
         let mut lockdown = LockdownClient::connect(&provider)
             .await

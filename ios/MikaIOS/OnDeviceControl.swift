@@ -17,6 +17,7 @@ import UniformTypeIdentifiers
     @Published private(set) var hasPairing=false
     @Published private(set) var starting=false
     @Published private(set) var sessionIdentifier=""
+    @Published private(set) var requested=false
     @Published var host=UserDefaults.standard.string(forKey:"localDeviceHost") ?? "10.7.0.1" {didSet {UserDefaults.standard.set(host,forKey:"localDeviceHost")}}
     private var monitor:Task<Void,Never>?
     private var health:Task<Void,Never>?
@@ -24,6 +25,11 @@ import UniformTypeIdentifiers
     private var credential=""
     private var startupBackground:UIBackgroundTaskIdentifier = .invalid
     private var developerProbeStarted=false
+    private let diagnosticLaunchID:String = {
+        let args=ProcessInfo.processInfo.arguments
+        guard let index=args.firstIndex(of:"--mika-control-run-id"),index+1<args.count else {return ""}
+        return String(args[index+1].prefix(64))
+    }()
     @Published private(set) var apps:[[String:String]]=[]
     private var directory:URL {FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalControl",isDirectory:true)}
     private var pairURL:URL {directory.appendingPathComponent("pairing.plist")}
@@ -48,11 +54,13 @@ import UniformTypeIdentifiers
             do {try importPairing(data);try FileManager.default.removeItem(at:bootstrap)}
             catch {detail="设备配对记录导入失败。"}
         }
+        requested=PhoneControlResumePolicy.requested(saved:UserDefaults.standard.object(forKey:"localControlWanted") as? Bool,hasPairing:hasPairing,hasPreviousSession:!credential.isEmpty)
+        UserDefaults.standard.set(requested,forKey:"localControlWanted")
         saveDiagnostics()
     }
     // Local acceptance evidence contains no pairing material, tokens, UI text or app catalog.
     private func saveDiagnostics() {
-        let result:[String:Any]=["ready":ready,"phase":phase,"detail":detail,"has_pairing":hasPairing,"timestamp":ISO8601DateFormatter().string(from:Date())]
+        let result:[String:Any]=["ready":ready,"requested":requested,"phase":phase,"detail":detail,"has_pairing":hasPairing,"launch_id":diagnosticLaunchID,"timestamp":ISO8601DateFormatter().string(from:Date())]
         let url=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalControlDiagnostics.json")
         if let data=try? JSONSerialization.data(withJSONObject:result,options:[.sortedKeys]) {try? data.write(to:url,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
     }
@@ -81,6 +89,7 @@ import UniformTypeIdentifiers
         detail="设备配对记录已保存在本机，未上传到服务器。"
     }
     func start() {
+        requested=true;UserDefaults.standard.set(true,forKey:"localControlWanted")
         guard !starting,!ready else {return}
         if MikaTunnelManager.shared.embedded {
             starting=true;phase="连接本地隧道";detail="首次使用需在系统提示中允许 Mika 添加 VPN 配置。"
@@ -131,6 +140,7 @@ import UniformTypeIdentifiers
         #endif
     }
     func stop() async {
+        requested=false;UserDefaults.standard.set(false,forKey:"localControlWanted")
         monitor?.cancel();monitor=nil
         health?.cancel();health=nil
         _ = try? await request(path:"/control",body:["action":"stop"])
@@ -163,8 +173,8 @@ import UniformTypeIdentifiers
         guard ready else {throw Model.Issue.message("请先在设置 → 本机控制中启动执行器。")}
         var command=body
         command["return_to_mika"]=returnToMika
-        // The runner returns to Mika after each operation. Model requests therefore run
-        // in the foreground instead of relying on silent audio or an indefinite background task.
+        // Callers choose foreground behavior. The agent holds a finite, monitored
+        // background assertion across model calls instead of returning after each step.
         let background=UIApplication.shared.beginBackgroundTask(withName:"Mika 本机操作")
         defer {if background != .invalid {UIApplication.shared.endBackgroundTask(background)}}
         do {return try await request(path:"/control",body:command)}
@@ -225,6 +235,7 @@ struct LocalControlSetup:View {
     @State private var importing=false
     @State private var importingProxy=false
     @State private var error=""
+    @AppStorage("localSmoothExecution") private var smoothExecution=true
     var body:some View {
         Form {
             Section {
@@ -243,10 +254,13 @@ struct LocalControlSetup:View {
                 TextField("LocalDevVPN 的设备地址",text:$control.host).keyboardType(.decimalPad).textInputAutocapitalization(.never).autocorrectionDisabled().disabled(control.starting || control.ready)
             }
             Section {
+                Toggle("连续操作，减少页面切换",isOn:$smoothExecution).accessibilityIdentifier("smoothLocalExecution")
+                Text("默认停留在目标 App 连续处理，完成后返回 Mika。后台时间不足或需要你回答时会回到 Mika；关闭后使用每步返回的兼容模式。更改从下一项任务生效。")
+                    .font(.footnote).foregroundStyle(.secondary)
                 Button(control.starting ? "正在启动…" : "启动本机控制") {control.start()}.disabled(control.starting || control.ready || !control.hasPairing).accessibilityIdentifier("startLocalControl")
                 Button("验证：打开设置并读屏") {Task {await control.smokeTest()}}.disabled(!control.ready)
                 Button("停止本机控制",role:.destructive) {Task {await control.stop()}}
-            } footer:{Text("控制时会切换目标 App，完成每步后返回 Mika。系统锁屏及首次自动化授权由你在手机上处理。")}
+            } footer:{Text("控制时会切换到目标 App。系统锁屏及首次自动化授权由你在手机上处理。")}
             Section("同一隧道中的代理") {
                 Toggle("代理网络 + 本机控制",isOn:$tunnel.proxyEnabled).disabled(!tunnel.embedded || control.starting || control.ready)
                 Button(tunnel.hasProxyConfig ? "更换 Clash YAML 配置" : "导入 Clash YAML 配置") {importingProxy=true}.disabled(control.starting || control.ready)

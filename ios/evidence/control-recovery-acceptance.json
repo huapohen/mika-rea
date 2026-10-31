@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-31",
+  "device": "iPhone 15 Pro / iOS 26.6.2",
+  "failure": "Runtime runner removed during intrusive UI tests; local port also refused while Wi-Fi was disconnected despite LocalDevVPN showing connected",
+  "restored": ["signed local runner", "fresh trusted USB pairing", "saved Wi-Fi connection", "automatic resume of requested local control"],
+  "standalone_settings": {"timestamp": "2026-10-31T10:50:18Z", "result": "iOS 26.6.2", "returned_to_mika": true},
+  "standalone_third_party": {"timestamp": "2026-10-31T10:51:12Z", "app": "Clash Mi", "result": "1.0.31.1703", "opened_about_by_ui": true, "returned_to_mika": true, "vpn_changed_during_task": false},
+  "mac_driver_active_during_standalone_checks": false,
+  "unit_tests_passed": 17,
+  "rust_diagnostic_tests_passed": 1,
+  "not_verified": ["5G-only control", "device reboot recovery"]
+}

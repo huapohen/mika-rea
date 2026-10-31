@@ -84,11 +84,12 @@ struct RemoteTaskSummary: Identifiable {
     @Published var localError = ""
     private var conversation = ""
     private var conversationEndpoint = ""
-    private let defaults: UserDefaults
+    let defaults: UserDefaults
     private let vault: CredentialStore
     private let client: MCPClient
     private let storage: URL
     let providerSession:URLSession
+    private let phoneConnection:PhoneControlConnection
     private var monitorGeneration = 0
     private var handoffMonitor:Task<Void,Never>?
     private var handoffMonitorID:UUID?
@@ -105,10 +106,11 @@ struct RemoteTaskSummary: Identifiable {
     private var historyURL: URL { storage.appendingPathComponent("conversations.json") }
     private var taskURL: URL { storage.appendingPathComponent("active-task.json") }
 
-    init(client: MCPClient = MCPClient(), storage: URL? = nil, defaults: UserDefaults = .standard, vault: CredentialStore = KeychainCredentials(), providerSession:URLSession = .shared) {
+    init(client: MCPClient = MCPClient(), storage: URL? = nil, defaults: UserDefaults = .standard, vault: CredentialStore = KeychainCredentials(), providerSession:URLSession = .shared,phoneConnection:PhoneControlConnection?=nil) {
         self.defaults = defaults
         self.vault = vault
         self.providerSession=providerSession
+        self.phoneConnection=phoneConnection ?? OnDeviceControl.shared
         self.client = client
         self.storage = storage ?? FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0]
         interactionGate.onChange={ [weak self] item in
@@ -286,6 +288,8 @@ struct RemoteTaskSummary: Identifiable {
     }
 
     private func chat(_ text: String) async throws {
+        if phoneConnection.requested,!phoneConnection.ready {localProgress="正在恢复本机执行器"}
+        try await phoneConnection.ensureReadyIfRequested()
         if OnDeviceControl.shared.ready {try await runLocalAgent(text);return}
         guard !apiKey.isEmpty else { throw Issue.message("请在设置中填写模型 API Key。") }
         guard let url=URL(string:base.trimmingCharacters(in:CharacterSet(charactersIn:"/"))+"/chat/completions"),url.scheme == "https" else { throw Issue.message("模型地址必须是 HTTPS。") }

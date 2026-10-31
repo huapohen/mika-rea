@@ -216,7 +216,28 @@ pub unsafe extern "C" fn mika_local_string_free(value: *mut c_char) {
 }
 
 fn safe_error(stage: &str, error: IdeviceError) -> String {
+    // The library's code 1 means every socket I/O error, not POSIX EPERM.
+    // Keep the OS number/kind without displaying arbitrary peer/error text.
+    if let IdeviceError::Socket(ref io) = error {
+        let hint = if stage == "连接新版配对端口" && io.kind() == std::io::ErrorKind::ConnectionRefused {
+            "。请确认手机已连接 Wi-Fi，且 LocalDevVPN 已连接，再点重连"
+        } else { "" };
+        return format!("{stage}失败（网络 {:?}，系统代码 {}）{hint}", io.kind(), io.raw_os_error().unwrap_or(-1));
+    }
     format!("{stage}失败（代码 {}）", error.code())
+}
+
+#[cfg(test)]
+mod diagnostics_tests {
+    use super::*;
+    #[test]
+    fn socket_diagnostics_distinguish_failures_without_echoing_private_text() {
+        let refused = safe_error("连接", std::io::Error::from(std::io::ErrorKind::ConnectionRefused).into());
+        let denied = safe_error("连接", std::io::Error::from(std::io::ErrorKind::PermissionDenied).into());
+        assert_ne!(refused, denied);
+        let private = safe_error("连接", std::io::Error::other("private-server-response").into());
+        assert!(!private.contains("private-server-response"));
+    }
 }
 async fn run_remote(
     bundle: plist::Dictionary,
