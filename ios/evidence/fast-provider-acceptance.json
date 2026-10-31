@@ -1,0 +1,11 @@
+{
+  "effort_when_enabled": "low",
+  "elapsed_seconds": 0.7073628902435303,
+  "http_status": 200,
+  "marker_confirmed": true,
+  "model": "deepseek-flash",
+  "reasoning_content_empty": true,
+  "reasoning_tokens": null,
+  "thinking": "disabled",
+  "timestamp": "2026-10-31T11:39:33Z"
+}

@@ -35,6 +35,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>允许 Mika 创建你要求的闹钟，在指定时间响铃提醒你。</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

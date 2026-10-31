@@ -28,6 +28,7 @@ private final class ReceiverMemoryCredentials:CredentialStore {
         defaults.set(execution.returnAfterTask,forKey:"localReturnAfterTask")
         let engine=Model(storage:directory,defaults:defaults,vault:ReceiverMemoryCredentials(),providerSession:owner.providerSession)
         engine.mode="iPhone";engine.base=owner.base;engine.model=owner.model;engine.apiKey=owner.apiKey
+        engine.thinkingEnabled=owner.thinkingEnabled;engine.reasoningEffort=owner.reasoningEffort
         model=engine
         engine.interactionChanged={ [weak self] item in try self?.interactionHandler?(item) }
         observer=engine.objectWillChange.sink { [weak self,weak engine] in Task { @MainActor in

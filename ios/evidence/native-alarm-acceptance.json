@@ -1,0 +1,23 @@
+{
+  "alerting_observed": true,
+  "cleanup_verified": true,
+  "created_and_read_back": true,
+  "native_api": true,
+  "phase": "finished",
+  "scheduled_at": "2026-10-31T12:24:09Z",
+  "success": true,
+  "temporary_alarm": true,
+  "timestamp": "2026-10-31T12:24:09Z",
+  "device": "iPhone 15 Pro",
+  "ios": "26.6.2",
+  "wifi": false,
+  "cellular": true,
+  "usb_attached_for_development": true,
+  "mac_xctest_driver_running": false,
+  "lock_state_before": "passcodeRequired=true",
+  "lock_state_after": "passcodeRequired=true",
+  "physical_cable_removal_tested": false,
+  "audible_output_recorded": false,
+  "siri_entry_verified": false,
+  "scope": "System AlarmKit alerting state while locked; temporary alarm cleanup verified. Not evidence of arbitrary app UI control or of Siri invocation."
+}

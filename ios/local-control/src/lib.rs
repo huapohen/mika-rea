@@ -22,6 +22,14 @@ use std::{
     time::Duration,
 };
 use tokio::sync::oneshot;
+mod local_transport;
+
+/// Debug transport probe; no pairing material or application data is read.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mika_local_probe(host:*const c_char)->*mut c_char {
+    let Some(host)=(unsafe {copy_string(host)}) else {return std::ptr::null_mut()};
+    CString::new(local_transport::probe(&host)).map(|v|v.into_raw()).unwrap_or(std::ptr::null_mut())
+}
 
 struct LauncherState {
     status: String,
@@ -220,7 +228,7 @@ fn safe_error(stage: &str, error: IdeviceError) -> String {
     // Keep the OS number/kind without displaying arbitrary peer/error text.
     if let IdeviceError::Socket(ref io) = error {
         let hint = if stage == "连接新版配对端口" && io.kind() == std::io::ErrorKind::ConnectionRefused {
-            "。请确认手机已连接 Wi-Fi，且 LocalDevVPN 已连接，再点重连"
+            "。本机开发端口拒绝连接；VPN 显示连接不代表控制通道可用。原生闹钟仍可独立使用"
         } else { "" };
         return format!("{stage}失败（网络 {:?}，系统代码 {}）{hint}", io.kind(), io.raw_os_error().unwrap_or(-1));
     }

@@ -82,6 +82,9 @@ struct ContentView: View {
                 localControl.restoreIfRequested()
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--mika-capsule-live-preview") {MikaCapsuleCoordinator.shared.preview()}
+                if ProcessInfo.processInfo.arguments.contains("--mika-fast-provider-probe") {await model.runFastProviderProbeIfRequested()}
+                if ProcessInfo.processInfo.arguments.contains("--mika-native-alarm-probe") {await PhoneAlarms.shared.acceptanceProbe()}
+                if ProcessInfo.processInfo.arguments.contains("--mika-native-alarm-lock-create-probe") {await PhoneAlarms.shared.acceptanceProbe(lockedCreation:true)}
                 #endif
                 await localControl.runDeveloperProbeIfRequested()
                 #if DEBUG

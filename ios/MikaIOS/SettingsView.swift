@@ -13,6 +13,7 @@ struct SettingsHome: View {
                 NavigationLink { IOSReceiverSettings() } label: {setting("接收远程协助","iphone.radiowaves.left.and.right",RemoteIOSReceiver.shared.enabled ? "已开启" : "关闭")}.accessibilityIdentifier("settingsIOSReceiver")
                 NavigationLink { CapsuleSettings() } label: { setting("悬浮胶囊","bubble.left.and.bubble.right",capsule.mode=="off" ? "关闭" : "已开启") }.accessibilityIdentifier("settingsCapsule")
                 NavigationLink { ModelSettings(model:model) } label: { setting("模型","cpu",model.model) }.accessibilityIdentifier("settingsModels")
+                NavigationLink { PhoneAlarmSettings() } label: {setting("Mika 闹钟","alarm","")}.accessibilityIdentifier("settingsNativeAlarms")
                 NavigationLink { ConnectionSettings(model:model) } label: { setting("手机操作","iphone",model.isRemote ? model.transport : "本机助手") }
                 NavigationLink { BrowserView(model:model) } label: { setting("浏览器","globe","") }
             }
@@ -37,6 +38,13 @@ struct ModelSettings: View {
                 TextField("HTTPS 基础地址",text:$model.base).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                 SecureField("API Key",text:$model.apiKey).textInputAutocapitalization(.never).autocorrectionDisabled()
                 TextField("主模型名称",text:$model.model).textInputAutocapitalization(.never).autocorrectionDisabled()
+            }
+            if URL(string:model.base)?.host?.lowercased()=="api.deepseek.com" {
+                Section("响应速度") {
+                    Toggle("深度思考",isOn:$model.thinkingEnabled).accessibilityIdentifier("providerThinking")
+                    Picker("思考强度",selection:$model.reasoningEffort) {Text("最低").tag("low");Text("高").tag("high");Text("最高").tag("max")}.disabled(!model.thinkingEnabled)
+                    Text("默认关闭思考，使用 Flash 直接回答。需要复杂推理时可以自行开启。").font(.footnote).foregroundStyle(.secondary)
+                }
             }
             Section {
                 Button {Task {await test()}} label: {HStack {Text(testing ? "正在测试…" : "测试连接");Spacer();if testing {ProgressView()}}}.disabled(testing || model.apiKey.isEmpty)

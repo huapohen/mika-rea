@@ -1,0 +1,76 @@
+{
+  "checks": [
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "default",
+      "os_error": 61,
+      "port": 49152
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_address",
+      "os_error": 61,
+      "port": 49152
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_interface",
+      "os_error": 61,
+      "port": 49152
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_both",
+      "os_error": 61,
+      "port": 49152
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "default",
+      "os_error": 61,
+      "port": 62078
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_address",
+      "os_error": 61,
+      "port": 62078
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_interface",
+      "os_error": 61,
+      "port": 62078
+    },
+    {
+      "connected": false,
+      "kind": "ConnectionRefused",
+      "mode": "bind_both",
+      "os_error": 61,
+      "port": 62078
+    }
+  ],
+  "interfaces": [
+    {
+      "address": "10.7.1.1",
+      "index": 38,
+      "name": "utun6"
+    }
+  ],
+  "network": {
+    "cellular": true,
+    "satisfied": true,
+    "wifi": false
+  },
+  "peer": "10.7.0.1",
+  "timestamp": "2026-10-31T11:48:32Z",
+  "control_ready": false,
+  "scope": "Cellular-only LocalDevVPN 1.3.0 transport probe; all tested port and binding modes refused. This is a failed standalone UI-control acceptance."
+}

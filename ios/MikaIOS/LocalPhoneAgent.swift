@@ -48,7 +48,7 @@ extension Model {
             guard control.ready else {throw Issue.message("本机控制会话已停止。")}
             var request=URLRequest(url:url);request.httpMethod="POST";request.timeoutInterval=120
             request.setValue("Bearer "+apiKey,forHTTPHeaderField:"Authorization");request.setValue("application/json",forHTTPHeaderField:"Content-Type")
-            request.httpBody=try JSONSerialization.data(withJSONObject:["model":model,"messages":turns,"tools":tools,"tool_choice":"auto","parallel_tool_calls":false])
+            request.httpBody=try providerBody(["model":model,"messages":turns,"tools":tools,"tool_choice":"auto","parallel_tool_calls":false])
             let (data,response)=try await providerSession.data(for:request)
             try await window.prepare()
             guard let http=response as? HTTPURLResponse,(200..<300).contains(http.statusCode) else {throw Issue.message("模型请求失败，HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)。")}

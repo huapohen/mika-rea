@@ -26,6 +26,7 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         CFBundleDisplayName: Mika
         NSSupportsLiveActivities: true
+        NSAlarmKitUsageDescription: 允许 Mika 创建你要求的闹钟，在指定时间响铃提醒你。
         UIBackgroundModes: [processing]
         BGTaskSchedulerPermittedIdentifiers: [com.huapohen.mikaremote.agent.*]
         CFBundleURLTypes:

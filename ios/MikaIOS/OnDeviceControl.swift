@@ -1,11 +1,13 @@
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
+import Network
 
 #if !targetEnvironment(simulator)
 @_silgen_name("mika_local_start") private func nativeStart(_ pairing:UnsafePointer<CChar>,_ host:UnsafePointer<CChar>,_ runner:UnsafePointer<CChar>,_ token:UnsafePointer<CChar>)->Int32
 @_silgen_name("mika_local_stop") private func nativeStop()
 @_silgen_name("mika_local_status") private func nativeStatus()->UnsafeMutablePointer<CChar>?
+@_silgen_name("mika_local_probe") private func nativeProbe(_ host:UnsafePointer<CChar>)->UnsafeMutablePointer<CChar>?
 @_silgen_name("mika_local_string_free") private func nativeStringFree(_ value:UnsafeMutablePointer<CChar>)
 #endif
 
@@ -68,6 +70,25 @@ import UniformTypeIdentifiers
     func runDeveloperProbeIfRequested() async {
         #if DEBUG
         let arguments=ProcessInfo.processInfo.arguments
+        if arguments.contains("--mika-local-network-probe") {
+            #if !targetEnvironment(simulator)
+            let address=host
+            let data=await Task.detached {()->Data? in
+                guard let pointer=address.withCString({nativeProbe($0)}) else {return nil}
+                let bytes=Data(String(cString:pointer).utf8);nativeStringFree(pointer);return bytes
+            }.value
+            let path=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalNetworkProbe.json")
+            if let data,var value=try? JSONSerialization.jsonObject(with:data) as? [String:Any] {
+                let monitor=NWPathMonitor();monitor.start(queue:DispatchQueue.global(qos:.utility))
+                try? await Task.sleep(nanoseconds:500_000_000)
+                let current=monitor.currentPath
+                value["network"]=["satisfied":current.status == .satisfied,"wifi":current.usesInterfaceType(.wifi),"cellular":current.usesInterfaceType(.cellular)]
+                value["timestamp"]=ISO8601DateFormatter().string(from:Date());monitor.cancel()
+                if let output=try? JSONSerialization.data(withJSONObject:value,options:[.sortedKeys]) {try? output.write(to:path,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
+            }
+            #endif
+            return
+        }
         let probe=arguments.contains("--mika-local-control-probe")
         guard !developerProbeStarted,probe || arguments.contains("--mika-local-control-start") else {return}
         developerProbeStarted=true
