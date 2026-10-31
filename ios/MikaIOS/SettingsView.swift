@@ -7,6 +7,7 @@ struct SettingsHome: View {
                 HStack(spacing:14) { Image(systemName:model.mode == "安卓" ? "iphone.radiowaves.left.and.right" : "sparkles").font(.title2).foregroundStyle(Color.mikaBlue); VStack(alignment:.leading,spacing:5) {Text(model.mode == "安卓" ? "安卓远程助手" : "iPhone 本机助手").font(.headline);Text(model.busy ? "正在执行任务" : "按需配置模型与连接设备").font(.caption).foregroundStyle(.secondary)} }
             }
             Section("基本") {
+                NavigationLink { LocalControlSetup() } label: { setting("本机控制","hand.tap",OnDeviceControl.shared.phase) }.accessibilityIdentifier("settingsLocalControl")
                 NavigationLink { ModelSettings(model:model) } label: { setting("模型","cpu",model.model) }.accessibilityIdentifier("settingsModels")
                 NavigationLink { ConnectionSettings(model:model) } label: { setting("手机操作","iphone",model.mode == "安卓" ? model.transport : "本机助手") }
                 NavigationLink { BrowserView(model:model) } label: { setting("浏览器","globe","") }

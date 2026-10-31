@@ -6,13 +6,19 @@ import Security
 
 enum Secret {
     static func get(_ key: String) -> String {
-        let q: [String: Any] = [kSecClass as String:kSecClassGenericPassword, kSecAttrService as String:"MikaIOS", kSecAttrAccount as String:key, kSecReturnData as String:true]
-        var result: CFTypeRef?; guard SecItemCopyMatching(q as CFDictionary, &result) == errSecSuccess, let d = result as? Data else { return "" }; return String(data:d, encoding:.utf8) ?? ""
+        let query: [String: Any] = [kSecClass as String:kSecClassGenericPassword, kSecAttrService as String:"MikaIOS", kSecAttrAccount as String:key, kSecReturnData as String:true]
+        var result: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary,&result)==errSecSuccess,let data=result as? Data else {return ""}
+        return String(data:data,encoding:.utf8) ?? ""
     }
-    static func set(_ key: String, _ value: String) {
-        let q: [String: Any] = [kSecClass as String:kSecClassGenericPassword, kSecAttrService as String:"MikaIOS", kSecAttrAccount as String:key]
-        SecItemDelete(q as CFDictionary)
-        if !value.isEmpty { var item=q; item[kSecValueData as String]=Data(value.utf8); SecItemAdd(item as CFDictionary,nil) }
+    @discardableResult static func set(_ key: String,_ value: String) -> Bool {
+        let query: [String: Any] = [kSecClass as String:kSecClassGenericPassword,kSecAttrService as String:"MikaIOS",kSecAttrAccount as String:key]
+        if value.isEmpty {let status=SecItemDelete(query as CFDictionary);return status==errSecSuccess || status==errSecItemNotFound}
+        let attributes: [String: Any] = [kSecValueData as String:Data(value.utf8),kSecAttrAccessible as String:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
+        let status=SecItemUpdate(query as CFDictionary,attributes as CFDictionary)
+        if status==errSecSuccess {return true}
+        guard status==errSecItemNotFound else {return false}
+        return SecItemAdd(query.merging(attributes) {_,new in new} as CFDictionary,nil)==errSecSuccess
     }
 }
 struct Message: Identifiable, Codable { var id = UUID(); let role: String; let text: String }
@@ -54,6 +60,7 @@ struct ChatRecord: Identifiable, Codable { var id: String; var title: String; va
     @Published var token = Secret.get("mcp") { didSet { Secret.set("mcp",token) } }
     @Published var messages: [Message] = [] { didSet { saveHistory() } }
     @Published var busy = false
+    var localToolTrace:[String]=[]
     @Published var taskID = UserDefaults.standard.string(forKey:"activeTask") ?? "" { didSet { UserDefaults.standard.set(taskID,forKey:"activeTask") } }
     @Published var conversation = ""
     @Published var waiting = false
@@ -76,6 +83,7 @@ struct ChatRecord: Identifiable, Codable { var id: String; var title: String; va
                 add("assistant", "任务已提交，正在查看进度。")
                 await poll()
             } else {
+                if OnDeviceControl.shared.ready { try await runLocalAgent(text); return }
                 guard !apiKey.isEmpty else { throw Issue.message("请在设置中填写模型 API Key。") }
                 guard let url = URL(string: base.trimmingCharacters(in:CharacterSet(charactersIn:"/")) + "/chat/completions"), url.scheme == "https" else { throw Issue.message("模型地址必须是 HTTPS。") }
                 var request=URLRequest(url:url); request.httpMethod="POST"; request.setValue("Bearer \(apiKey)",forHTTPHeaderField:"Authorization"); request.setValue("application/json",forHTTPHeaderField:"Content-Type")

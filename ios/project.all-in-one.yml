@@ -1,0 +1,38 @@
+include: project.yml
+name: MikaIOS
+targets:
+  MikaIOS:
+    entitlements:
+      path: MikaIOS/Network.entitlements
+      properties:
+        com.apple.developer.networking.networkextension: [packet-tunnel-provider]
+    settings:
+      base:
+        ARCHS: arm64
+        "OTHER_LDFLAGS[sdk=iphoneos*]": "$(inherited) -L$(PROJECT_DIR)/Native -lmika_local_control -framework Security -framework SystemConfiguration -lresolv"
+    dependencies:
+      - target: MikaLocalTunnel
+        embed: true
+  MikaLocalTunnel:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: '17.4'
+    sources:
+      - path: MikaLocalTunnel
+        excludes: [Info.plist, Network.entitlements]
+    info:
+      path: MikaLocalTunnel/Info.plist
+    entitlements:
+      path: MikaLocalTunnel/Network.entitlements
+    settings:
+      base:
+        ARCHS: arm64
+        PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote.local-tunnel
+        DEVELOPMENT_TEAM: RQHK3ZN3W7
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: '5.0'
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) MIKA_PROXY_CORE"
+        "OTHER_LDFLAGS[sdk=iphoneos*]": "$(inherited) -L$(PROJECT_DIR)/Native -lmika_proxy_core_device -framework Security -framework SystemConfiguration -lresolv"
+        "OTHER_LDFLAGS[sdk=iphonesimulator*]": "$(inherited) -L$(PROJECT_DIR)/Native -lmika_proxy_core_sim -framework Security -framework SystemConfiguration -lresolv"
+        SKIP_INSTALL: YES

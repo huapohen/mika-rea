@@ -1,0 +1,6 @@
+# Preserve upstream reference and license text byte-for-byte, including whitespace.
+integrations/localdevvpn/LICENSE -whitespace
+integrations/localdevvpn/Reference/** -whitespace
+ios/local-control/vendor/idevice/** -whitespace
+# Unified diff context prefixes intentionally precede upstream tabs.
+patches/*.patch -whitespace

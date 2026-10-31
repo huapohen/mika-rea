@@ -7,6 +7,7 @@ extension Color {
 }
 struct ContentView: View {
     @StateObject private var model = Model()
+    @ObservedObject private var localControl = OnDeviceControl.shared
     @State private var input = ""
     @State private var drawer = false
     @State private var destination: String?
@@ -25,7 +26,7 @@ struct ContentView: View {
                 VStack(spacing:0) {
                     HStack(spacing:8) {
                         Circle().fill(model.mode == "安卓" ? Color.mikaBlue : Color.green).frame(width:6,height:6)
-                        Text(model.mode == "安卓" ? "安卓 Mika · \(model.transport)" : "iPhone · 本机助手").font(.caption).foregroundStyle(.secondary)
+                        Text(model.mode == "安卓" ? "安卓 Mika · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手")).font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" } } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备")
                     }.padding(.horizontal,22)
@@ -59,6 +60,18 @@ struct ContentView: View {
                 sidebar.frame(width:300).background(Color(uiColor:.systemBackground)).transition(.move(edge:.leading))
             }
         }.tint(.mikaBlue)
+            .task {
+                await localControl.runDeveloperProbeIfRequested()
+                #if DEBUG
+                if localControl.ready,ProcessInfo.processInfo.arguments.contains("--mika-local-agent-probe") {
+                    model.mode="iPhone";model.newChat()
+                    await model.send("打开本机系统设置，进入通用、关于本机，读取当前 iOS 版本后返回 Mika。不要更改任何设置。")
+                    let result:[String:Any]=["tools":model.localToolTrace,"reply":model.messages.last?.text ?? "","timestamp":ISO8601DateFormatter().string(from:Date())]
+                    let path=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalAgentAcceptance.json")
+                    if let data=try? JSONSerialization.data(withJSONObject:result,options:[.sortedKeys]) {try? data.write(to:path,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
+                }
+                #endif
+            }
             .sheet(item:$destination) { route in NavigationStack { routeView(route).toolbar { ToolbarItem(placement:.navigationBarTrailing) { Button("完成") { destination=nil } } } } }
             .fileImporter(isPresented:$importing,allowedContentTypes:[.plainText,.text],allowsMultipleSelection:false) { result in
                 do { guard let url=try result.get().first else { return }; let granted=url.startAccessingSecurityScopedResource();defer { if granted { url.stopAccessingSecurityScopedResource() } }; let data=try Data(contentsOf:url);guard data.count<=1_000_000,let text=String(data:data,encoding:.utf8) else { throw Model.Issue.message("请选择 1 MB 以内的 UTF-8 文本文件") }; model.pageText=text }
@@ -75,7 +88,7 @@ struct ContentView: View {
                     HStack(spacing:16) { Image(systemName:examples[index].0).frame(width:22).foregroundStyle(.secondary); Text(examples[index].1).font(.system(size:15)).multilineTextAlignment(.leading).foregroundStyle(.primary); Spacer(minLength:0) }.padding(.horizontal,16).padding(.vertical,18).frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
                 }.buttonStyle(.plain)
             } }.background(Color(uiColor:.secondarySystemGroupedBackground)).clipShape(RoundedRectangle(cornerRadius:20)).padding(.top,20)
-            if model.mode == "iPhone" { Text("操作安卓 App 请切换到安卓助手，并在设置中配置连接。当前 iPhone 助手支持聊天和阅读内容。").font(.caption).foregroundStyle(.secondary).padding(.top,12) }
+            if model.mode == "iPhone" { Text("操作本机 App 请先在设置中开启「本机控制」。操作安卓设备可切换到安卓助手。").font(.caption).foregroundStyle(.secondary).padding(.top,12) }
         }
     }
     private var greeting: String { let hour=Calendar.current.component(.hour,from:Date());return hour<12 ? "上午好" : hour<18 ? "下午好" : "晚上好" }
@@ -112,7 +125,7 @@ struct ContentView: View {
         case "设置": SettingsHome(model:model)
         case "连接设备": ConnectionSettings(model:model)
         case "浏览器": BrowserView(model:model)
-        default: List {Section {Text("Mika").font(.largeTitle.bold());Text("iPhone 伴侣 · 开发版");Text("基于 wangzan101/Mika 的 Android 项目移植界面，并实现原生聊天、网页阅读和安卓远程任务。")};Section("项目") {Link("Mika 源码",destination:URL(string:"https://github.com/wangzan101/Mika")!);Link("REA",destination:URL(string:"https://github.com/morluto/rea")!)} }.navigationTitle("关于 Mika")
+        default: List {Section {Text("Mika").font(.largeTitle.bold());Text("iPhone 伴侣 · 开发版");Text("基于 Mika 实现原生对话、iPhone 本机控制与安卓远程任务。本地隧道基于 LocalDevVPN；合并代理使用 Mihomo 内核，并参考 Clash Mi。")};Section("项目") {Link("Mika 源码",destination:URL(string:"https://github.com/wangzan101/Mika")!);Link("REA",destination:URL(string:"https://github.com/morluto/rea")!);Link("Clash Mi（GPL-3.0）",destination:URL(string:"https://github.com/KaringX/clashmi")!);Link("Mihomo 内核（GPL-3.0）",destination:URL(string:"https://github.com/MetaCubeX/mihomo/tree/Meta")!);Link("本地隧道参考：LocalDevVPN（SideStore Team）",destination:URL(string:"https://github.com/jkcoxson/LocalDevVPN")!)} }.navigationTitle("关于 Mika")
         }
     }
 }

@@ -1,0 +1,20 @@
+{
+  "device": "iPhone 15 Pro",
+  "os": "iOS 26.6.2",
+  "timestamp": "2026-10-31T07:22:44Z",
+  "tools": [
+    "list_apps",
+    "launch_app",
+    "read_screen",
+    "tap",
+    "read_screen",
+    "tap",
+    "read_screen",
+    "tap",
+    "read_screen",
+    "launch_app"
+  ],
+  "observed_result": "iOS 26.6.2 read from Settings > General > About; returned to Mika",
+  "provider": "user-configured DeepSeek; API key omitted",
+  "runtime": "on-device; no Mac XCTest driver"
+}

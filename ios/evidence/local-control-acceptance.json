@@ -1,0 +1,15 @@
+{
+  "checks": {
+    "launch_settings": true,
+    "read_screen": true,
+    "swipe_changed_screen": true,
+    "tap_search": true,
+    "type_verified": true
+  },
+  "passed": true,
+  "timestamp": "2026-10-31T07:18:07Z",
+  "device": "iPhone 15 Pro",
+  "os": "iOS 26.6.2",
+  "runtime": "on-device RemotePairing / RSD / XCTest; external LocalDevVPN",
+  "mac_role": "sign, install, one-time USB provisioning, launch and collect evidence; no host XCTest or control gateway"
+}

@@ -1,31 +1,38 @@
-# Mika iPhone 伴侣（实验版）
+# Mika iPhone 客户端
 
-原版 Mika 是 Android 应用。本目录是独立的 SwiftUI iOS 客户端，不是 Kotlin/JVM 核心的完整移植。仓库其余目录保留原项目源码。
+这是基于 Mika 界面和远程接口开发的 SwiftUI 客户端，保留 Android 上游源码。它包含原生聊天、网页/文本阅读、历史对话、模型配置、安卓远程任务和 iPhone 本机控制。
 
-## 已实现
+## 已验收
 
-- iPhone 模式：使用 OpenAI 兼容的 HTTPS Chat Completions 接口聊天，密钥存入 iOS Keychain。内置浏览器可由用户选择读取网页正文，作为后续模型请求的上下文；可以清除已读取的正文。
-- 安卓模式：连接 Android Mika 的 Streamable HTTP MCP，提交任务、等待结果、回答问题、继续查看和停止任务。同一会话中的后续任务复用对话编号。对方手机必须运行 Mika 并开启「电脑连接（MCP）→ Wi-Fi 和私有网络」。付款和需要用户接管的操作仍在安卓设备上处理。
+- iPhone 15 Pro 真机及模拟器：侧边菜单、设置与返回、模型页、连接页、输入及发送按钮。
+- iPhone 15 Pro 真机：Keychain 中的 DeepSeek 配置可访问实际模型。
+- iPhone → `qinziduihua.com/mika-rea` → 安卓：任务往返及实际打开安卓系统设置、返回 Android 16。
+- iPhone 15 Pro / iOS 26.6.2：由手机自身启动 XCTest 执行器，打开系统设置、读屏、滑动画面、点击搜索框、输入并读回验证。五项检查通过，测试输入已清空。该测试没有 Mac XCTest 会话或控制网关参与动作执行。
 
-在 iPhone 的 Mika 设置里分别配置模型地址、模型名称、API Key，以及 Android Mika 显示的 MCP 地址和令牌。MCP 的 HTTP 传输未加密，只用于可信私有网络；令牌不要公开。
+本机控制实现与前提见 [local-control/README.md](local-control/README.md)。配对记录保存在手机，模型密钥和控制会话令牌保存在 Keychain，临时导入后删除引导文件。
 
-## 尚未实现和平台限制
+## 两种隧道构建
 
-- 不支持控制另一台 iPhone，也不能在本机后台读取或操作任意第三方 iOS App。iOS 不提供与 Android 无障碍和虚拟屏幕等价的通用接口。
-- 未移植 Mika Android 的完整代理核心、自动网页操作、文件沙箱、定时任务、记忆、ChatGPT 登录、后台任务和其他 Android 功能。
-- 对话保存在设备本机，支持侧边菜单选择历史对话；当前任务编号也会保存。已读取网页和文件只保存在本次运行内存中。长任务受 iOS 前后台调度约束。
-- 当前只对电脑到安卓 MCP 和安卓实际手机操作做过端到端验证，iPhone 到安卓的连接尚需在真机配置后验证。
+免费签名的标准构建使用 App Store LocalDevVPN 的本地回环；开启它会与另一个设备级 packet tunnel（如 Clash Mi）发生切换，不能据此宣称两者独立共存。
 
-## 构建
+一体化构建将本地回环与 Mihomo 代理放入同一个 NetworkExtension。已实现 Clash YAML 导入、代理开关、单隧道分流，内核包转发测试、arm64 模拟器和 iPhone 架构的无签名构建已通过。合并扩展还没有真机签名验收：当前三个 Apple 账号均为 Personal Team，Apple 实际拒绝其 Network Extensions 能力。需要具备该权限的开发团队。
 
-执行 `xcodegen generate --spec ios/project.yml`，在 Xcode 选择可用的开发团队签名后运行。团队 ID 是本机配置，其他开发者需更换。
+```sh
+# 标准构建
+scripts/build-ios-local-control.sh
+MIKA_IOS_UDID=<真机 UDID> scripts/install-ios-local-control.sh
 
-## iPhone 界面更新（2026-10-31）
+# 含代理及隧道扩展：需有效开发团队，付费团队 ID 由本人提供
+MIKA_IOS_VARIANT=all-in-one MIKA_TEAM_ID=<团队 ID> \
+  MIKA_IOS_UDID=<真机 UDID> scripts/install-ios-local-control.sh
+```
 
-参考 Android `ChatScreen.kt`、`ChatDrawer.kt`、`SettingsScreen.kt` 和 `theme/Colors.kt`，重写为 SwiftUI。包含问候语和任务示例卡、侧边菜单、历史对话、底部输入与文本附件、分组设置、模型连接测试、直连/中继配置与连接检查、内置浏览器。
+构建使用 Xcode、XcodeGen、Rust aarch64-apple-ios；合并代理另需 Go。依赖来源和许可证见 `integrations/localdevvpn/`、`integrations/clashmi/` 及 `licenses/`。当前原生库构建脚本面向 arm64 iPhone 和 Apple Silicon 模拟器。
 
-验证：`DeviceControlTests.testNavigationAndInput` 在 iPhone 15 Pro 模拟器和已连接的 iPhone 15 Pro 真机均通过，覆盖打开菜单、设置→模型→返回、设备连接页→返回、文本输入及发送按钮状态。截图见 `evidence/home.png`。
+## 仍需完成
 
-远程中继服务代码在 `relay/`，安卓连接助手在 `android-bridge/`。中继已部署至 `https://qinziduihua.com/mika-rea`，`testRelayAndroid` 在 iPhone 15 Pro 真机通过，验证了模型任务经公网中继到达安卓并返回结果。`testRelayPhoneControl` 也在 iPhone 15 Pro 真机通过，完成了打开安卓系统设置并返回版本的任务。
+本项目尚不是 Android Mika 全功能的逐项移植。远程控制另一台 iPhone、手机重启后的恢复、重签更新流程、Clash Mi 全部订阅/节点管理界面，以及 iOS 的文件沙箱、定时任务、记忆等尚需实现或验收。
 
-模型配置已支持从设备本地一次性导入文件存入钥匙串，导入后删除临时文件。`testConfiguredProvider` 在 iPhone 15 Pro 真机测试通过，确认 DeepSeek 模型列表请求成功。凭据不进入仓库。
+iPhone 本机控制需要设备解锁、开发者模式、有效执行器签名、本地开发连接和开发支持。会话按前台操作与短暂切换设计，不承诺在锁屏或长期后台状态控制其他 App。付费或免费签名权限都不会绕过系统解锁和 App 本人验证。
+
+真实 DeepSeek 模型端到端验收已通过：手机侧连续调用 10 次工具进入“设置 → 通用 → 关于本机”，读回 iOS 26.6.2 后返回 Mika。脱敏证据位于 `ios/evidence/local-agent-acceptance.json`（以仓库根目录为起点）。

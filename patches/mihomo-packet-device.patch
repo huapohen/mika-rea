@@ -1,0 +1,16 @@
+diff --git a/listener/sing_tun/server_notwindows.go b/listener/sing_tun/server_notwindows.go
+--- a/listener/sing_tun/server_notwindows.go
++++ b/listener/sing_tun/server_notwindows.go
+@@ -6,6 +6,12 @@ import (
+ 	tun "github.com/metacubex/sing-tun"
+ )
+ 
++// Mika: inject NetworkExtension packet I/O without private file-descriptor access.
++var CustomTunFactory func(tun.Options) (tun.Tun, error)
++
+ func tunNew(options tun.Options) (tun.Tun, error) {
++	if CustomTunFactory != nil {
++		return CustomTunFactory(options)
++	}
+ 	return tun.New(options)
+ }

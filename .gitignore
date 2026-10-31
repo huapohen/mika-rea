@@ -32,3 +32,7 @@ relay/__pycache__/
 *.ipa
 **/xcuserdata/
 *.xcuserstate
+# Rebuilt native iOS device libraries and Rust intermediates
+ios/Native/*.a
+ios/Native/*.h
+ios/local-control/target/

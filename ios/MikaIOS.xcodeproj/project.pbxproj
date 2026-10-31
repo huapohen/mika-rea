@@ -8,14 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */; };
+		26BC92875721008821E6AB73 /* LocalControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */; };
+		38AAF0DF13AB1D16AA877663 /* LocalPhoneAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */; };
+		567965943C28B85EFE35555F /* LocalControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */; };
 		5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA7737935650160E9074D2C /* ContentView.swift */; };
+		80C5F3C468FF308A4DBD71F6 /* OnDeviceControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55A9D9601B0CAFBDA3883E9 /* OnDeviceControl.swift */; };
+		898335DB885DB87A2E2FB071 /* LocalControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */; };
 		BD435E741A907984B88A8C15 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A933D9593A6437B6F840205 /* SettingsView.swift */; };
+		CF0F21C5ED14ADC9D65DC5E0 /* MikaTunnelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */; };
 		D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F484000F83A498BEFACD5A7C /* BrowserView.swift */; };
 		D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80664ECF799D8E00D9FFB99 /* Model.swift */; };
 		F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD1BC73166688166B30AD8A /* MikaIOS.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		94553ED3F5B6D918F6559CEA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 78F747EE28E72F9C09EF3D19 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F35629DC352BDFA7A5C48925;
+			remoteInfo = MikaIOS;
+		};
 		B2C01AAE2B251AC03CF4C9A3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 78F747EE28E72F9C09EF3D19 /* Project object */;
@@ -29,12 +42,19 @@
 		0DA7737935650160E9074D2C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4A933D9593A6437B6F840205 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceControlTests.swift; sourceTree = "<group>"; };
+		5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaTunnelManager.swift; sourceTree = "<group>"; };
 		682FDFA64E43727CB37D3529 /* MikaIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MikaIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6DD1BC73166688166B30AD8A /* MikaIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaIOS.swift; sourceTree = "<group>"; };
+		802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LocalControlRunner.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A171E7F91F76B55193D8ACE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlTests.swift; sourceTree = "<group>"; };
+		C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlServer.swift; sourceTree = "<group>"; };
 		D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DeviceControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3B67A7287FAF50C316BC859 /* Network.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Network.entitlements; sourceTree = "<group>"; };
+		DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPhoneAgent.swift; sourceTree = "<group>"; };
 		E80664ECF799D8E00D9FFB99 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		F484000F83A498BEFACD5A7C /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+		F55A9D9601B0CAFBDA3883E9 /* OnDeviceControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -42,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */,
+				802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */,
 				682FDFA64E43727CB37D3529 /* MikaIOS.app */,
 			);
 			name = Products;
@@ -51,9 +72,18 @@
 			isa = PBXGroup;
 			children = (
 				F4464F981BDDDC9B030640F7 /* DeviceControlTests */,
+				5625BD8153E57A0617301C61 /* LocalControlRunner */,
 				D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */,
 				15B745F43DAE8A97A408B788 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5625BD8153E57A0617301C61 /* LocalControlRunner */ = {
+			isa = PBXGroup;
+			children = (
+				B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */,
+			);
+			path = LocalControlRunner;
 			sourceTree = "<group>";
 		};
 		D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */ = {
@@ -62,8 +92,12 @@
 				F484000F83A498BEFACD5A7C /* BrowserView.swift */,
 				0DA7737935650160E9074D2C /* ContentView.swift */,
 				A171E7F91F76B55193D8ACE1 /* Info.plist */,
+				DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */,
 				6DD1BC73166688166B30AD8A /* MikaIOS.swift */,
+				5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */,
 				E80664ECF799D8E00D9FFB99 /* Model.swift */,
+				D3B67A7287FAF50C316BC859 /* Network.entitlements */,
+				F55A9D9601B0CAFBDA3883E9 /* OnDeviceControl.swift */,
 				4A933D9593A6437B6F840205 /* SettingsView.swift */,
 			);
 			path = MikaIOS;
@@ -73,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */,
+				C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */,
 			);
 			path = DeviceControlTests;
 			sourceTree = "<group>";
@@ -80,6 +115,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0FE307CB4E0EE85E487FB56B /* LocalControlRunner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 65F409C267413F9F70FB12ED /* Build configuration list for PBXNativeTarget "LocalControlRunner" */;
+			buildPhases = (
+				B8CC7C209CB49B035D32D86A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				604AF4F5DB2C0310989C67D3 /* PBXTargetDependency */,
+			);
+			name = LocalControlRunner;
+			packageProductDependencies = (
+			);
+			productName = LocalControlRunner;
+			productReference = 802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		CF6BB9B2A23992E7F43F187B /* DeviceControlTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3796DF808716E1689B4C8486 /* Build configuration list for PBXNativeTarget "DeviceControlTests" */;
@@ -124,6 +177,11 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					0FE307CB4E0EE85E487FB56B = {
+						DevelopmentTeam = RQHK3ZN3W7;
+						ProvisioningStyle = Automatic;
+						TestTargetID = F35629DC352BDFA7A5C48925;
+					};
 					CF6BB9B2A23992E7F43F187B = {
 						DevelopmentTeam = RQHK3ZN3W7;
 						ProvisioningStyle = Automatic;
@@ -151,6 +209,7 @@
 			targets = (
 				F35629DC352BDFA7A5C48925 /* MikaIOS */,
 				CF6BB9B2A23992E7F43F187B /* DeviceControlTests */,
+				0FE307CB4E0EE85E487FB56B /* LocalControlRunner */,
 			);
 		};
 /* End PBXProject section */
@@ -162,9 +221,21 @@
 			files = (
 				D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */,
 				5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */,
+				38AAF0DF13AB1D16AA877663 /* LocalPhoneAgent.swift in Sources */,
 				F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */,
+				CF0F21C5ED14ADC9D65DC5E0 /* MikaTunnelManager.swift in Sources */,
 				D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */,
+				80C5F3C468FF308A4DBD71F6 /* OnDeviceControl.swift in Sources */,
 				BD435E741A907984B88A8C15 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8CC7C209CB49B035D32D86A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				567965943C28B85EFE35555F /* LocalControlServer.swift in Sources */,
+				898335DB885DB87A2E2FB071 /* LocalControlTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,12 +244,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */,
+				26BC92875721008821E6AB73 /* LocalControlServer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		604AF4F5DB2C0310989C67D3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F35629DC352BDFA7A5C48925 /* MikaIOS */;
+			targetProxy = 94553ED3F5B6D918F6559CEA /* PBXContainerItemProxy */;
+		};
 		B5721F2FA2E91B4FD7BEB3B1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F35629DC352BDFA7A5C48925 /* MikaIOS */;
@@ -199,10 +276,31 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -L$(PROJECT_DIR)/Native -lmika_local_control -framework Security -framework SystemConfiguration -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1C9E426EC39F674148D613F0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.huapohen.mikaremote.local-runner";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MIKA_LOCAL_RUNNER";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MikaIOS;
 			};
 			name = Debug;
 		};
@@ -363,6 +461,26 @@
 			};
 			name = Release;
 		};
+		EF1D0ADDE4628AC21B57B40F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.huapohen.mikaremote.local-runner";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MIKA_LOCAL_RUNNER";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MikaIOS;
+			};
+			name = Release;
+		};
 		F540C1E938CB367925BC79AC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -375,6 +493,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -L$(PROJECT_DIR)/Native -lmika_local_control -framework Security -framework SystemConfiguration -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -399,6 +518,15 @@
 			buildConfigurations = (
 				7B36CC9C668E43FB7261CEB4 /* Debug */,
 				320B71DF3A3606EFE84AA41E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		65F409C267413F9F70FB12ED /* Build configuration list for PBXNativeTarget "LocalControlRunner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C9E426EC39F674148D613F0 /* Debug */,
+				EF1D0ADDE4628AC21B57B40F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
