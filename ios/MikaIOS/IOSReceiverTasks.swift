@@ -6,6 +6,8 @@ import CryptoKit
     var available:Bool {get}
     var model:Model? {get}
     var progressHandler:((String)->Void)? {get set}
+    var interactionHandler:((PhoneInteraction?) throws -> Void)? {get set}
+    func respond(interactionID:String,text:String,source:PhoneInteraction.Source) throws
     func execute(goal:String,conversation:String) async throws -> String
     func cancel() async
 }
@@ -21,9 +23,12 @@ struct IOSReceivedTask:Codable,Identifiable {
     var requestDigest:String
     var updatedAt:Date
     var cancelRequested:Bool=false
+    var interaction:PhoneInteraction?
+    var answeredInteractionID:String?
+    var answerDigest:String?
     var terminal:Bool {["done","failed","cancelled"].contains(status)}
     var result:[String:Any] {
-        ["task_id":id,"conversation":conversation,"goal":goal,"status":status,"progress":progress,"answer":answer,"reason":reason,"updated_at":ISO8601DateFormatter().string(from:updatedAt)]
+        ["task_id":id,"conversation":conversation,"goal":goal,"status":status,"progress":progress,"answer":answer,"reason":reason,"question":interaction?.prompt ?? "","interaction":interaction.map {$0.rpc as Any} ?? NSNull(),"updated_at":ISO8601DateFormatter().string(from:updatedAt)]
     }
 }
 
@@ -42,10 +47,11 @@ struct IOSReceivedTask:Codable,Identifiable {
         if FileManager.default.fileExists(atPath:storage.path) {
             do {
                 let records=try JSONDecoder().decode([IOSReceivedTask].self,from:Data(contentsOf:storage))
-                tasks=records.map {record in var value=record;if !value.terminal {value.status="failed";value.reason="设备执行会话已结束；请检查已发生的操作，不会自动重试。";value.progress="上次会话已中断";value.updatedAt=Date()};return value}
+                tasks=records.map {record in var value=record;if !value.terminal {value.status="failed";value.interaction=nil;value.reason="设备执行会话已结束；请检查已发生的操作，不会自动重试。";value.progress="上次会话已中断";value.updatedAt=Date()};return value}
             } catch {storageReadable=false}
         }
         worker.progressHandler={ [weak self] progress in self?.progress(progress) }
+        worker.interactionHandler={ [weak self] item in try self?.interaction(item) }
         if storageReadable {try? persist()}
     }
     private func persist() throws {
@@ -55,6 +61,12 @@ struct IOSReceivedTask:Codable,Identifiable {
     private func progress(_ text:String) {
         guard let id=activeID,let index=tasks.firstIndex(where:{$0.id==id}) else {return}
         tasks[index].progress=String(text.prefix(200));tasks[index].updatedAt=Date();try? persist()
+    }
+    private func interaction(_ item:PhoneInteraction?) throws {
+        guard let id=activeID,let index=tasks.firstIndex(where:{$0.id==id}),!tasks[index].terminal else {return}
+        tasks[index].interaction=item;tasks[index].status=item?.status ?? "running"
+        tasks[index].progress=tasks[index].cancelRequested ? "正在停止后续操作" : item == nil ? "继续处理任务" : item?.kind == .handoff ? "等待受控手机本人操作" : "等待回答问题"
+        tasks[index].updatedAt=Date();try persist()
     }
     func rpc(_ request:[String:Any]) async -> [String:Any] {
         let id=request["id"] ?? NSNull()
@@ -84,16 +96,34 @@ struct IOSReceivedTask:Codable,Identifiable {
             let timeout=min(10,max(0,args["timeout_s"] as? Double ?? 10))
             let deadline=Date().addingTimeInterval(timeout)
             while Date()<deadline {
-                let record=try find(["task_id":id]);if record.terminal {return record.result}
+                let record=try find(["task_id":id]);if record.terminal || record.interaction != nil {return record.result}
                 try await Task.sleep(nanoseconds:200_000_000)
             }
             return try find(["task_id":id]).result
         case "mika_cancel_task":
             let task=try find(args);if task.terminal {return ["cancelled":false,"status":task.status]}
             await cancel(task.id);return ["cancelled":true,"status":try find(args).status]
-        case "mika_answer":throw ReceiverIssue("此任务当前没有等待回答；可在同一会话提交后续交代。")
+        case "mika_answer":
+            let task=try find(args)
+            guard let id=args["interaction_id"] as? String,let text=args["text"] as? String else {throw ReceiverIssue("回答需要对应的问题编号与内容")}
+            return try respond(taskID:task.id,interactionID:id,text:text,source:.controller)
         default:throw ReceiverIssue("不支持的工具")
         }
+    }
+    func respond(taskID:String,interactionID:String,text:String,source:PhoneInteraction.Source) throws -> [String:Any] {
+        guard let index=tasks.firstIndex(where:{$0.id==taskID}) else {throw ReceiverIssue("找不到任务")}
+        let digest=SHA256.hash(data:Data(text.utf8)).map {String(format:"%02x",$0)}.joined()
+        if tasks[index].answeredInteractionID==interactionID {
+            guard tasks[index].answerDigest==digest else {throw ReceiverIssue("该问题已收到不同的回答")}
+            return ["accepted":true,"status":tasks[index].status]
+        }
+        guard activeID==taskID,!tasks[index].cancelRequested,let item=tasks[index].interaction,item.id==interactionID else {throw ReceiverIssue("此问题已结束或已被新问题替代")}
+        _ = try item.validate(text,source:source)
+        let old=tasks[index]
+        tasks[index].answeredInteractionID=interactionID;tasks[index].answerDigest=digest;tasks[index].updatedAt=Date()
+        do {try persist()} catch {tasks[index]=old;throw ReceiverIssue("回答未提交：记录无法保存")}
+        try worker.respond(interactionID:interactionID,text:text,source:source)
+        return ["accepted":true,"status":tasks.first(where:{$0.id==taskID})?.status ?? "running"]
     }
     private func find(_ args:[String:Any]) throws -> IOSReceivedTask {
         guard let id=args["task_id"] as? String,let task=tasks.first(where:{$0.id==id}) else {throw ReceiverIssue("找不到此手机上的任务")}
@@ -139,7 +169,7 @@ struct IOSReceivedTask:Codable,Identifiable {
     }
     private func finish(_ id:String,status:String,answer:String,reason:String) {
         guard let index=tasks.firstIndex(where:{$0.id==id}) else {return}
-        tasks[index].status=status;tasks[index].answer=answer;tasks[index].reason=reason;tasks[index].progress=status=="done" ? "任务已完成" : "执行已结束";tasks[index].updatedAt=Date();try? persist()
+        tasks[index].status=status;tasks[index].interaction=nil;tasks[index].answer=answer;tasks[index].reason=reason;tasks[index].progress=status=="done" ? "任务已完成" : "执行已结束";tasks[index].updatedAt=Date();try? persist()
     }
     func cancel(_ id:String) async {
         guard activeID==id,let index=tasks.firstIndex(where:{$0.id==id}),!tasks[index].terminal else {return}

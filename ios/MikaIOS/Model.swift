@@ -65,13 +65,19 @@ struct RemoteTaskSummary: Identifiable {
     var localToolTargets:[String]=[]
     @Published var busy = false
     @Published var receivingRemoteWork = false
+    @Published private(set) var localInteraction:PhoneInteraction?
+    let interactionGate=PhoneInteractionGate()
+    var interactionChanged:((PhoneInteraction?) throws -> Void)?
     @Published private(set) var workID=""
     @Published var localProgress=""
     @Published private(set) var lastOutcome=""
     private var localRequest:Task<Void,Error>?
     @Published var cancelling = false
     @Published var pageText = ""
-    @Published var remoteTask: RemoteTaskRecord? { didSet { saveTask() } }
+    @Published var remoteTask: RemoteTaskRecord? { didSet {
+        saveTask()
+        if remoteTask?.id != oldValue?.id || remoteTask?.status != "waiting_on_phone" {handoffMonitor?.cancel();handoffMonitor=nil;handoffMonitorID=nil}
+    } }
     @Published var remoteTasks: [RemoteTaskSummary] = []
     @Published var connectionStatus = ""
     @Published var loadingRemoteTasks = false
@@ -84,11 +90,17 @@ struct RemoteTaskSummary: Identifiable {
     private let storage: URL
     let providerSession:URLSession
     private var monitorGeneration = 0
+    private var handoffMonitor:Task<Void,Never>?
+    private var handoffMonitorID:UUID?
     var taskID: String { remoteTask?.id ?? "" }
     var waiting: Bool { remoteTask?.status == "waiting_for_answer" }
     var isRemote:Bool {mode != "iPhone"}
     var targetLabel:String {mode == "远程 iPhone" ? "远程 iPhone" : mode == "安卓" ? "安卓 Mika" : "iPhone 本机"}
-    var canSend: Bool { !receivingRemoteWork && !busy && (remoteTask == nil || waiting) }
+    var canSend: Bool {
+        let localReply=localInteraction?.kind == .question
+        let remoteReply=waiting && (remoteTask?.interaction==nil || remoteTask?.interaction?.kind == .question)
+        return !receivingRemoteWork && (!busy || localReply) && (remoteTask == nil || remoteReply) && (localInteraction==nil || localReply)
+    }
     var taskProgress: String { remoteTask?.progress ?? "" }
     private var historyURL: URL { storage.appendingPathComponent("conversations.json") }
     private var taskURL: URL { storage.appendingPathComponent("active-task.json") }
@@ -99,6 +111,12 @@ struct RemoteTaskSummary: Identifiable {
         self.providerSession=providerSession
         self.client = client
         self.storage = storage ?? FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0]
+        interactionGate.onChange={ [weak self] item in
+            guard let self else {return};self.localInteraction=item
+            if let item {self.localProgress=item.kind == .handoff ? "等待本机本人操作" : "等待你的回答"}
+            else if self.busy {self.localProgress="继续处理任务"}
+            try self.interactionChanged?(item)
+        }
         if let value=defaults.string(forKey:"mode") { mode=value }
         if let value=defaults.string(forKey:"base") { base=value }
         if let value=defaults.string(forKey:"model") { model=value }
@@ -149,6 +167,7 @@ struct RemoteTaskSummary: Identifiable {
             defaults.removeObject(forKey:"activeTask")
         }
         defaults.set(selectedChat,forKey:"selectedChat")
+        if let task=remoteTask,task.status=="waiting_on_phone" {watchHandoff(task.id)}
     }
 
     private func saveHistory() {
@@ -203,13 +222,19 @@ struct RemoteTaskSummary: Identifiable {
 
     func send(_ text: String) async {
         guard canSend,!text.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return }
+        if let item=localInteraction {
+            do {try await respondToInteraction(text,expectedID:item.id)} catch {localError=error.localizedDescription}
+            return
+        }
         workID=UUID().uuidString;lastOutcome="";localProgress="正在思考"
         add("user",text); busy=true
         defer { busy=false }
         do {
             if let task = remoteTask {
                 guard task.status == "waiting_for_answer" else { return }
-                _ = try await taskCall("mika_answer",["task_id":task.id,"text":text],task:task)
+                var arguments:[String:Any]=["task_id":task.id,"text":text]
+                if let item=task.interaction {arguments["interaction_id"]=item.id}
+                _ = try await taskCall("mika_answer",arguments,task:task)
                 await poll()
             } else if isRemote {
                 let (connection,credential)=try selectedConnection()
@@ -238,10 +263,26 @@ struct RemoteTaskSummary: Identifiable {
         }
     }
     var capsuleOperationID:String {remoteTask?.id ?? workID}
+    func respondToInteraction(_ text:String,expectedID:String) async throws {
+        if let item=localInteraction,item.id==expectedID {
+            try interactionGate.respond(id:expectedID,text:text,source:.owner)
+            add("user",item.kind == .confirmation ? (text=="approve" ? "同意继续" : "不同意") : item.kind == .handoff ? (text=="complete" ? "已在本机处理，请核实" : "跳过本人操作") : text)
+            return
+        }
+        guard let task=remoteTask,task.status=="waiting_for_answer",task.interaction?.id==expectedID,!busy else {throw Issue.message("问题已变化，请刷新任务后回答")}
+        _ = try task.interaction?.validate(text,source:.controller)
+        busy=true;defer {busy=false}
+        _ = try await taskCall("mika_answer",["task_id":task.id,"interaction_id":expectedID,"text":text],task:task)
+        add("user",task.interaction?.kind == .confirmation ? (text=="approve" ? "同意继续" : "不同意") : text)
+        await poll()
+    }
     func stopWork(expectedID:String) async {
         guard !expectedID.isEmpty,expectedID==capsuleOperationID else {return}
         if remoteTask != nil {await cancelTask()}
-        else if busy,let localRequest {localProgress="正在停止后续操作";localRequest.cancel()}
+        else if busy,let localRequest {
+            localProgress="正在停止后续操作";localRequest.cancel()
+            if let item=localInteraction {interactionGate.cancel(item.id)}
+        }
     }
 
     private func chat(_ text: String) async throws {
@@ -301,13 +342,14 @@ struct RemoteTaskSummary: Identifiable {
                 remoteTask?.status=status
                 remoteTask?.progress=response["progress"] as? String ?? response["note"] as? String ?? status
                 remoteTask?.question=response["question"] as? String ?? ""
+                remoteTask?.interaction=PhoneInteraction.fromRPC(response["interaction"])
                 remoteTask?.updatedAt=Date()
                 switch status {
                 case "done": lastOutcome="done";add("assistant",response["answer"] as? String ?? "任务完成。");remoteTask=nil;return
                 case "failed": lastOutcome="failed";add("assistant",response["reason"] as? String ?? "任务未完成。");remoteTask=nil;return
                 case "cancelled": lastOutcome="cancelled";add("assistant","任务已停止。");remoteTask=nil;return
                 case "waiting_for_answer": add("assistant",response["question"] as? String ?? "目标 Mika 需要你的回答。");return
-                case "waiting_on_phone": add("assistant","请在目标手机上完成需要本人处理的操作，然后点击「查看」。");return
+                case "waiting_on_phone": add("assistant","请在目标手机上完成需要本人处理的操作；交还控制后会继续更新。也可点击「查看」刷新。");watchHandoff(initial.id);return
                 default: break
                 }
                 response=try await taskCall("mika_wait_task",["task_id":initial.id,"timeout_s":10],task:initial)
@@ -317,6 +359,26 @@ struct RemoteTaskSummary: Identifiable {
             guard remoteTask?.id == initial.id else { return }
             remoteTask?.progress="连接中断，任务可能仍在目标设备运行。点击「查看」恢复。"
             add("assistant","查看任务失败：\(error.localizedDescription)\n已保留任务编号：\(initial.id)，不会自动重复提交。")
+        }
+    }
+    private func watchHandoff(_ taskID:String) {
+        guard handoffMonitor==nil else {return}
+        let generation=UUID();handoffMonitorID=generation
+        handoffMonitor=Task { [weak self] in
+            defer {if self?.handoffMonitorID==generation {self?.handoffMonitor=nil;self?.handoffMonitorID=nil}}
+            while !Task.isCancelled {
+                do {try await Task.sleep(nanoseconds:2_000_000_000)} catch {return}
+                guard let self,let task=self.remoteTask,task.id==taskID,task.status=="waiting_on_phone" else {return}
+                if self.busy {continue}
+                do {
+                    let result=try await self.taskCall("mika_task_status",["task_id":task.id],task:task)
+                    guard !Task.isCancelled,self.remoteTask?.id==taskID,self.remoteTask?.status=="waiting_on_phone",!self.busy else {continue}
+                    if result["status"] as? String=="waiting_on_phone" {continue}
+                    // Transfer monitoring to poll() without cancelling this task's requests.
+                    self.handoffMonitor=nil;self.handoffMonitorID=nil
+                    await self.resumeTask();return
+                } catch {if Task.isCancelled {return}}
+            }
         }
     }
     func loadRemoteTasks() async {

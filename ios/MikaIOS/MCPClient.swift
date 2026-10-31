@@ -119,5 +119,6 @@ struct RemoteTaskRecord: Codable, Equatable {
     var progress: String
     var question: String
     var updatedAt: Date
+    var interaction:PhoneInteraction?=nil
     var terminal: Bool { ["done", "failed", "cancelled"].contains(status) }
 }

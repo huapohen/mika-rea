@@ -141,7 +141,11 @@ struct IOSReceiverSettings:View {
                 Button("关闭连接并停止后续操作",role:.destructive) {Task {await receiver.stop()}}.disabled(!receiver.enabled && receiver.activeTask==nil)
             }
             if let task=receiver.activeTask {
-                Section("正在执行配对设备的任务") {Text(task.goal);Text(task.progress).font(.footnote);Button("停止这项任务",role:.destructive) {Task {await receiver.tasks.cancel(task.id)}}}
+                Section("正在执行配对设备的任务") {
+                    Text(task.goal);Text(task.progress).font(.footnote)
+                    if let item=task.interaction {PhoneInteractionView(interaction:item,owner:true) {text in _ = try receiver.tasks.respond(taskID:task.id,interactionID:item.id,text:text,source:.owner)}.id(item.id)}
+                    Button("停止这项任务",role:.destructive) {Task {await receiver.tasks.cancel(task.id)}}
+                }
             }
             Section("本机接收记录") {
                 ForEach(receiver.tasks.tasks.sorted {$0.updatedAt>$1.updatedAt}.prefix(20)) {task in

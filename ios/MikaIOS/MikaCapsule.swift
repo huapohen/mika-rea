@@ -19,6 +19,8 @@ struct MikaCapsuleState:Equatable {
             if model.cancelling {state.phase="stopping";state.headline="正在停止任务";state.detail="等待目标设备确认"}
             else if ["waiting_for_answer","waiting_on_phone"].contains(remote.status) {state.phase="needsUser";state.headline="Mika 需要你处理";state.detail=remote.status=="waiting_for_answer" ? "打开 Mika 回答问题" : "请在目标手机上完成操作"}
             else {state.phase="running";state.headline=model.busy ? "Mika 正在处理" : "任务待查看";state.detail=model.busy ? "正在查看目标设备进度" : "打开 Mika 恢复查看进度"}
+        } else if let item=model.localInteraction {
+            state.active=true;state.canStop=true;state.phase="needsUser";state.headline="Mika 需要你处理";state.detail=item.kind == .handoff ? "请在本机完成操作后交还控制" : "打开 Mika 回答问题"
         } else if model.busy {
             state.active=true;state.phase="running";state.headline="Mika 正在处理"
             state.detail=model.isRemote ? "正在提交到目标设备" : model.localProgress
@@ -100,6 +102,7 @@ struct MikaCapsuleState:Equatable {
     @Published private(set) var systemStatus="当前没有系统胶囊"
     @Published private(set) var activityCount=0
     @Published private(set) var lastAction=UserDefaults.standard.string(forKey:"capsuleLastAction") ?? "" {didSet {UserDefaults.standard.set(lastAction,forKey:"capsuleLastAction")}}
+    @Published private(set) var inputError=""
     private weak var model:Model?
     private var subscriptions=Set<AnyCancellable>()
     private var window:CapsuleWindow?
@@ -114,6 +117,9 @@ struct MikaCapsuleState:Equatable {
     var bubbleVisible:Bool {mode=="always" || (mode=="duringTasks" && state.active)}
     var previewing:Bool {previewState != nil}
     var currentModel:Model? {model}
+    var interaction:PhoneInteraction? {RemoteIOSReceiver.shared.activeTask?.interaction ?? model?.localInteraction ?? model?.remoteTask?.interaction}
+    var interactionOwner:Bool {RemoteIOSReceiver.shared.activeTask != nil || model?.localInteraction != nil}
+    var canSubmit:Bool {if let task=RemoteIOSReceiver.shared.activeTask {return task.interaction?.kind == .question};return model?.canSend == true}
     func bind(_ model:Model) {
         guard self.model !== model else {refresh();return}
         self.model=model;subscriptions=[]
@@ -145,7 +151,7 @@ struct MikaCapsuleState:Equatable {
     func refresh() {
         if let model {state=MikaCapsuleState.read(model)}
         if let received=RemoteIOSReceiver.shared.activeTask {
-            state=MikaCapsuleState(id:"received:"+received.id,phase:received.cancelRequested ? "stopping" : "running",headline:"正在执行远程协助",detail:received.cancelRequested ? "正在停止后续操作" : received.progress,target:"iPhone 远程协助",active:true,canStop:!received.cancelRequested)
+            state=MikaCapsuleState(id:"received:"+received.id,phase:received.cancelRequested ? "stopping" : received.interaction != nil ? "needsUser" : "running",headline:received.interaction != nil ? "远程协助需要你处理" : "正在执行远程协助",detail:received.cancelRequested ? "正在停止后续操作" : received.progress,target:"iPhone 远程协助",active:true,canStop:!received.cancelRequested)
         }
         if lastAction=="intent_stop_preview",state.active || OnDeviceControl.shared.ready {lastAction=""}
         if mode=="off" {expanded=false}
@@ -174,9 +180,17 @@ struct MikaCapsuleState:Equatable {
     }
     func expand() {guard !expanded else {expanded=false;return};expanded=true;previousKey=window?.windowScene?.windows.first {$0.isKeyWindow && $0 !== window} ?? window?.windowScene?.windows.first {$0 !== window && $0.windowLevel == .normal};window?.makeKey()}
     func submit(_ text:String) async {
+        if let task=RemoteIOSReceiver.shared.activeTask,let item=task.interaction,item.kind == .question {
+            do {_ = try RemoteIOSReceiver.shared.tasks.respond(taskID:task.id,interactionID:item.id,text:text,source:.owner);inputError="";expanded=false} catch {inputError=error.localizedDescription};return
+        }
         guard let model,model.canSend else {return}
         expanded=false
         await model.send(text)
+    }
+    func respond(_ text:String,expectedID:String) async throws {
+        if let task=RemoteIOSReceiver.shared.activeTask,task.interaction?.id==expectedID {_ = try RemoteIOSReceiver.shared.tasks.respond(taskID:task.id,interactionID:expectedID,text:text,source:.owner);return}
+        guard let model else {throw Model.Issue.message("任务会话已结束")}
+        try await model.respondToInteraction(text,expectedID:expectedID)
     }
     func stop(_ id:String) async throws {
         ensureBridge()
@@ -295,13 +309,15 @@ private struct MikaCapsuleOverlay:View {
             HStack {Image("MikaLogo").resizable().scaledToFit().frame(width:30,height:30);Text("Mika").font(.headline);Spacer();Button {coordinator.expanded=false} label:{Image(systemName:"xmark.circle.fill").foregroundStyle(.secondary)}.accessibilityLabel("收起胶囊")}
             Text(coordinator.state.headline).font(.title3.bold())
             Text(coordinator.state.active ? (coordinator.currentModel?.taskProgress.isEmpty==false ? coordinator.currentModel!.taskProgress : coordinator.state.detail) : (coordinator.currentModel?.mode=="安卓" ? "任务将交给已配置的安卓 Mika" : (OnDeviceControl.shared.ready ? "本机控制已连接" : "本机控制未开启，可聊天或切换安卓助手"))).font(.subheadline).foregroundStyle(.secondary)
-            if let remote=coordinator.currentModel?.remoteTask,!remote.question.isEmpty {Text(remote.question).font(.subheadline).lineLimit(4)}
-            TextField(coordinator.currentModel?.waiting==true ? "回答 Mika…" : "交代一件事…",text:$input,axis:.vertical).lineLimit(1...4).textFieldStyle(.roundedBorder).accessibilityIdentifier("capsuleTaskInput")
+            if let item=coordinator.interaction {PhoneInteractionView(interaction:item,owner:coordinator.interactionOwner,showsInput:false) {text in try await coordinator.respond(text,expectedID:item.id)}.id(item.id)}
+            else if let remote=coordinator.currentModel?.remoteTask,!remote.question.isEmpty {Text(remote.question).font(.subheadline).lineLimit(4)}
+            if !coordinator.inputError.isEmpty {Text(coordinator.inputError).font(.caption).foregroundStyle(.red)}
+            TextField(coordinator.interaction != nil || coordinator.currentModel?.waiting==true ? "回答 Mika…" : "交代一件事…",text:$input,axis:.vertical).lineLimit(1...4).textFieldStyle(.roundedBorder).accessibilityIdentifier("capsuleTaskInput")
             HStack {
                 Button("查看对话") {coordinator.route("task")}
                 Spacer()
                 if coordinator.state.canStop {Button("停止",role:.destructive) {Task {try? await coordinator.stop(coordinator.state.id)}}.accessibilityIdentifier("capsuleStop")}
-                Button("发送") {let text=input;input="";Task {await coordinator.submit(text)}}.buttonStyle(.borderedProminent).disabled(input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || coordinator.currentModel?.canSend != true).accessibilityIdentifier("capsuleSend")
+                Button("发送") {let text=input;input="";Task {await coordinator.submit(text)}}.buttonStyle(.borderedProminent).disabled(input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || !coordinator.canSubmit).accessibilityIdentifier("capsuleSend")
             }
             Divider()
             HStack {Button("本机控制") {coordinator.route("local")};Spacer();Button("胶囊设置") {coordinator.route("capsule")}}

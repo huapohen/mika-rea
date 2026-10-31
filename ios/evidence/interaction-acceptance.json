@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-31",
+  "receiver": "physical iPhone 15 Pro / iOS 26.6.2",
+  "controller": "iOS Simulator / iPhone 15 Pro profile",
+  "relay": "https://qinziduihua.com/mika-rea",
+  "question_and_confirmation": {
+    "outcome": "done",
+    "targets": [
+      "launch_app:com.nebula.clashmi",
+      "read_screen:com.nebula.clashmi",
+      "launch_app:com.huapohen.mikaremote"
+    ],
+    "timestamp": "2026-10-31T09:03:51Z",
+    "tools": [
+      "ask_user",
+      "request_confirmation",
+      "list_apps",
+      "launch_app",
+      "read_screen",
+      "launch_app"
+    ]
+  },
+  "owner_handoff": {
+    "ui": {
+      "automated_owner_ui_test": true,
+      "manual_target_screen_read": true,
+      "opening_app_did_not_answer": true,
+      "owner_continue_button_tapped": true,
+      "success": true,
+      "timestamp": "2026-10-31T09:11:00Z"
+    },
+    "agent": {
+      "outcome": "done",
+      "targets": [
+        "hand_to_user:com.nebula.clashmi",
+        "launch_app:com.nebula.clashmi",
+        "read_screen:com.nebula.clashmi",
+        "launch_app:com.huapohen.mikaremote"
+      ],
+      "timestamp": "2026-10-31T09:11:09Z",
+      "tools": [
+        "list_apps",
+        "hand_to_user",
+        "launch_app",
+        "read_screen",
+        "launch_app"
+      ]
+    },
+    "scope": "Automated taps on the real phone owner UI for a read-only step. No real login, CAPTCHA or payment was performed."
+  },
+  "cancel_while_waiting": {
+    "outcome": "cancelled",
+    "targets": [],
+    "timestamp": "2026-10-31T09:11:57Z",
+    "tools": []
+  },
+  "waiting_capsule": {
+    "phase": "needsUser",
+    "system_phase": "needsUser",
+    "system_activity_count": 1,
+    "timestamp": "2026-10-31T09:03:40Z"
+  },
+  "tests": {
+    "ios_unit": 15,
+    "relay": 6,
+    "remote_question_confirmation_ui": true,
+    "owner_handoff_ui_and_controller_result": true,
+    "remote_cancel_while_waiting_ui": true,
+    "navigation_and_input_ui": true
+  },
+  "invariants": [
+    "Only matching interaction IDs can be answered",
+    "Conflicting duplicate answers rejected",
+    "Old answers do not advance later questions",
+    "Remote controller cannot acknowledge an owner-only handoff",
+    "Timeout and cancellation never imply approval",
+    "Restarted interrupted tasks do not resume or replay",
+    "Handoff monitoring uses the original task endpoint and credential",
+    "Latest agent long poll supersedes a stale poll atomically"
+  ],
+  "scope_limits": [
+    "Not two physical iPhones",
+    "No actual interprovincial field test",
+    "Foreground and unlock/local-tunnel requirements remain",
+    "No real login or payment verification"
+  ],
+  "installed_runtime": {
+    "local_control_ready": true,
+    "receiver_enabled": false,
+    "system_phase": "ready",
+    "system_activity_count": 1,
+    "timestamp": "2026-10-31T09:16:45Z"
+  }
+}

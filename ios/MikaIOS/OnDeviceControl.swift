@@ -159,10 +159,10 @@ import UniformTypeIdentifiers
             }
         }
     }
-    func execute(_ body:[String:Any]) async throws -> [String:Any] {
+    func execute(_ body:[String:Any],returnToMika:Bool=true) async throws -> [String:Any] {
         guard ready else {throw Model.Issue.message("请先在设置 → 本机控制中启动执行器。")}
         var command=body
-        command["return_to_mika"]=true
+        command["return_to_mika"]=returnToMika
         // The runner returns to Mika after each operation. Model requests therefore run
         // in the foreground instead of relying on silent audio or an indefinite background task.
         let background=UIApplication.shared.beginBackgroundTask(withName:"Mika 本机操作")

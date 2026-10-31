@@ -1,5 +1,6 @@
 import XCTest
 final class DeviceControlTests: XCTestCase {
+    override func setUpWithError() throws {continueAfterFailure=false}
     func testNavigationAndInput() throws {
         let app = XCUIApplication(bundleIdentifier:"com.huapohen.mikaremote")
         app.launch()

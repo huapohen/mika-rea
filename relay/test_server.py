@@ -54,6 +54,21 @@ class RelayTests(unittest.TestCase):
     def test_expired_request_is_removed(self):
         with self.assertRaises(TimeoutError):self.relay.request('one',{'method':'initialize'},timeout=0.01)
         self.assertEqual({},self.relay.pending)
+    def test_reconnected_agent_replaces_stale_poll_without_losing_command(self):
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            old=pool.submit(self.relay.next,'one')
+            with self.relay.changed:
+                self.assertTrue(self.relay.changed.wait_for(lambda:self.relay.poll_generation.get('one',0)==1,timeout=2))
+            current=pool.submit(self.relay.next,'one')
+            with self.relay.changed:
+                self.assertTrue(self.relay.changed.wait_for(lambda:self.relay.poll_generation.get('one',0)==2,timeout=2))
+            self.assertEqual({},old.result(timeout=2))
+            rpc={'method':'tools/call','params':{'name':'mika_run_task','arguments':{'goal':'Do not lose this request'}}}
+            request=pool.submit(self.relay.request,'one',rpc,3)
+            command=current.result(timeout=2)
+            self.assertEqual(rpc,command['rpc'])
+            self.assertTrue(self.relay.complete('one',command['id'],{'result':'delivered once'}))
+            self.assertEqual({'result':'delivered once'},request.result(timeout=2))
     def test_provision_ios_preserves_other_devices_and_keeps_roles_separate(self):
         with tempfile.TemporaryDirectory() as directory:
             config=Path(directory)/'relay.json'

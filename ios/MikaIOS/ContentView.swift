@@ -84,6 +84,7 @@ struct ContentView: View {
                 await localControl.runDeveloperProbeIfRequested()
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--mika-ios-receiver-start"),localControl.ready {do {try receiver.start()} catch {model.localError=error.localizedDescription}}
+                if ProcessInfo.processInfo.arguments.contains("--mika-owner-handoff-ui-probe") {Task {await receiver.runOwnerUIProbeIfRequested()}}
                 if ProcessInfo.processInfo.arguments.contains("--mika-remote-ios-probe") || ProcessInfo.processInfo.arguments.contains("--mika-remote-ios-recover-probe") {
                     model.mode="远程 iPhone";model.transport="中继";model.newChat()
                     let args=ProcessInfo.processInfo.arguments
@@ -136,6 +137,9 @@ struct ContentView: View {
     private var composer: some View {
         VStack(spacing:8) {
             if !model.localError.isEmpty { HStack {Text(model.localError).font(.caption).foregroundStyle(.red);Spacer();Button("关闭") {model.localError=""}}.padding(.horizontal,20) }
+            if let item=model.localInteraction ?? model.remoteTask?.interaction {
+                PhoneInteractionView(interaction:item,owner:model.localInteraction != nil,showsInput:false) {text in try await model.respondToInteraction(text,expectedID:item.id)}.id(item.id).padding(.horizontal,20)
+            }
             if !model.taskID.isEmpty {
                 VStack(alignment:.leading,spacing:5) {
                     HStack { Text(model.waiting ? "Mika 需要你的回答" : "目标设备任务").font(.caption.bold());Spacer();if !model.busy {Button("查看") { Task { await model.resumeTask() } }};Button(model.cancelling ? "正在停止…" : "停止",role:.destructive) { Task { await model.cancelTask() } }.disabled(model.cancelling) }
@@ -146,7 +150,7 @@ struct ContentView: View {
             if !model.pageText.isEmpty { HStack { Label("已附加阅读内容",systemImage:"doc.text");Spacer();Button("移除") {model.pageText=""} }.font(.caption).padding(.horizontal,20) }
             HStack(alignment:.bottom,spacing:10) {
                 Menu { Button("打开浏览器",systemImage:"globe") { open("浏览器") };Button("添加文本文件",systemImage:"doc") {importing=true} } label: { Image(systemName:"plus").font(.title3).foregroundStyle(.secondary).frame(width:40,height:44) }.accessibilityLabel("添加附件")
-                TextField("说说想做的事…",text:$input,axis:.vertical).lineLimit(1...5).focused($focused).accessibilityIdentifier("taskInput").padding(.vertical,12)
+                TextField(model.localInteraction != nil || model.waiting ? "回答 Mika…" : "说说想做的事…",text:$input,axis:.vertical).lineLimit(1...5).focused($focused).accessibilityIdentifier("taskInput").padding(.vertical,12)
                 Button { let text=input; input="";focused=false;Task {await model.send(text)} } label: { Image(systemName:"arrow.up").font(.system(size:18,weight:.semibold)).foregroundStyle(.white).frame(width:38,height:38).background(input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || !model.canSend ? Color.gray.opacity(0.35) : Color.mikaBlue).clipShape(Circle()) }.accessibilityLabel("发送").disabled(!model.canSend || input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty).padding(.bottom,4)
             }.padding(.trailing,8).background(Color(uiColor:.secondarySystemGroupedBackground)).clipShape(RoundedRectangle(cornerRadius:25)).overlay(RoundedRectangle(cornerRadius:25).stroke(Color.primary.opacity(0.06))).padding(.horizontal,14)
         }.padding(.vertical,10).background(.ultraThinMaterial)

@@ -26,8 +26,7 @@
     "Not two physical iPhones",
     "No actual interprovincial/mobile-network field test",
     "Unlocked phone and foreground Mika required; brief target-app switches return to Mika",
-    "LocalDevVPN still required in free-team standard build",
-    "Structured waiting_for_answer/mika_answer handoff not implemented"
+    "LocalDevVPN still required in free-team standard build"
   ],
   "installed_runtime": {
     "local_control_ready": true,
@@ -35,5 +34,6 @@
     "system_activity_count": 1,
     "system_phase": "ready",
     "timestamp": "2026-10-31T08:49:15Z"
-  }
+  },
+  "follow_up": "Structured interactions subsequently verified in interaction-acceptance.json"
 }

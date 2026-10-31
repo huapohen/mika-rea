@@ -90,6 +90,31 @@ private final class BlockingProviderProtocol:URLProtocol {
         XCTAssertEqual(count,1)
         XCTAssertThrowsError(try RemoteConnection(endpoint:URL(string:"http://203.0.113.1/rpc")!,label:"public HTTP"))
     }
+    func testPhoneHandoffAutomaticallyRefreshesOriginalTaskAfterOwnerReturns() async throws {
+        let directory=FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
+        defer {try? FileManager.default.removeItem(at:directory)}
+        let suite=UUID().uuidString;let defaults=UserDefaults(suiteName:suite)!
+        defer {defaults.removePersistentDomain(forName:suite)}
+        let lock=NSLock();var returned=false;var submissions=0
+        StubProtocol.backend={request in
+            XCTAssertEqual(request.url?.host,"handoff.example.test")
+            XCTAssertEqual(request.value(forHTTPHeaderField:"Authorization"),"Bearer frozen-handoff-token")
+            let root=try JSONSerialization.jsonObject(with:StubProtocol.body(request)) as! [String:Any]
+            let name=(root["params"] as! [String:Any])["name"] as! String
+            if name=="mika_run_task" {lock.withLock {submissions+=1};return ["task_id":"handoff-one"]}
+            return lock.withLock {returned} ? ["status":"done","answer":"Owner step verified"] : ["status":"waiting_on_phone"]
+        }
+        let model=Model(client:client(),storage:directory,defaults:defaults,vault:MemoryVault())
+        model.mode="远程 iPhone";model.transport="中继";model.relayURL="https://handoff.example.test/mika-rea";model.deviceID="phone";model.relayToken="frozen-handoff-token"
+        await model.send("Wait for the phone owner")
+        XCTAssertEqual(model.remoteTask?.status,"waiting_on_phone")
+        model.relayURL="https://changed.example.test/mika-rea";model.relayToken="different-token"
+        lock.withLock {returned=true}
+        for _ in 0..<60 {if model.remoteTask==nil {break};try await Task.sleep(nanoseconds:100_000_000)}
+        XCTAssertNil(model.remoteTask);XCTAssertTrue(model.messages.contains {$0.text=="Owner step verified"})
+        XCTAssertEqual(submissions,1)
+    }
     func testStaleCapsuleStopCannotCancelAnotherTask() async throws {
         let directory=FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)

@@ -11,6 +11,8 @@ class Relay:
         self.queues = {key: queue.Queue(maxsize=16) for key in devices}
         self.pending = {}
         self.lock = threading.Lock()
+        self.changed = threading.Condition(self.lock)
+        self.poll_generation = {}
         self.last_seen = {}
     def auth(self, device, token, role):
         expected = self.devices.get(device, {}).get(role + '_token', '')
@@ -22,20 +24,31 @@ class Relay:
         ident = secrets.token_hex(16)
         event = threading.Event()
         item = {'id':ident,'rpc':rpc,'event':event,'device':device,'deadline':time.monotonic()+timeout}
-        with self.lock: self.pending[ident] = item
-        try:
+        with self.changed:
             self.queues[device].put_nowait(item)
+            self.pending[ident] = item
+            self.changed.notify_all()
+        try:
             if not event.wait(timeout): raise TimeoutError('Device offline or request timed out')
             return item['response']
         finally:
             with self.lock: self.pending.pop(ident, None)
     def next(self, device):
-        self.last_seen[device] = time.time()
-        end = time.monotonic()+20
-        while time.monotonic() < end:
-            try: item = self.queues[device].get(timeout=max(0.01,end-time.monotonic()))
-            except queue.Empty: return {}
-            with self.lock:
+        # A reconnect supersedes a long poll whose client may already be gone.
+        # Check the generation and dequeue atomically so the old poll cannot
+        # consume a command intended for the new phone connection.
+        with self.changed:
+            generation = self.poll_generation.get(device, 0) + 1
+            self.poll_generation[device] = generation
+            self.last_seen[device] = time.time()
+            self.changed.notify_all()
+            end = time.monotonic()+20
+            while time.monotonic() < end:
+                if self.poll_generation[device] != generation: return {}
+                try: item = self.queues[device].get_nowait()
+                except queue.Empty:
+                    self.changed.wait(max(0.01,end-time.monotonic()))
+                    continue
                 if item['id'] in self.pending and item['deadline'] > time.monotonic():
                     return {'id':item['id'],'rpc':item['rpc']}
         return {}

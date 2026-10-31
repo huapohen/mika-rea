@@ -5,6 +5,8 @@ import XCTest
     var available=true
     var model:Model? {nil}
     var progressHandler:((String)->Void)?
+    var interactionHandler:((PhoneInteraction?) throws -> Void)?
+    func respond(interactionID:String,text:String,source:PhoneInteraction.Source) throws {throw CancellationError()}
     var starts=0
     var cancellations=0
     private var continuation:CheckedContinuation<String,Error>?
