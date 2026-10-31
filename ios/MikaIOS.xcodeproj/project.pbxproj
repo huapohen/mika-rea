@@ -8,11 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		0433E2A937CD9CE442194A9D /* MCPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 518BD0605CE458C6DF4C6BBF /* MCPClient.swift */; };
+		0E8757F9268BFE6DFE3B91AD /* AgentExecutionPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AFCF369B86B8AEE7E0497 /* AgentExecutionPreferences.swift */; };
 		1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */; };
 		26BC92875721008821E6AB73 /* LocalControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */; };
 		38AAF0DF13AB1D16AA877663 /* LocalPhoneAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5524AE48333A81F167D580 /* LocalPhoneAgent.swift */; };
 		3E1546CD56657AAE40BFC2F4 /* MikaCapsule.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1A31B3BF791CC717E70902 /* MikaCapsule.swift */; };
 		3E2A5DD78B2C17508DFF983F /* MikaActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */; };
+		3FE02046D550EE5C87017096 /* BackgroundSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B970E9752C1196994A88BDF2 /* BackgroundSettingsTests.swift */; };
 		48F03F127BAC52C2663C8F35 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 12176BDCF4AD9E4EEE1ED75B /* Assets.xcassets */; };
 		4D3A5BE249627709B01DA274 /* CapsuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAD34B48B3A419910B29423 /* CapsuleTests.swift */; };
 		4D8DDEC4B150A736859D69E4 /* RemoteIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9894E8600600CC09297D7E0 /* RemoteIOSTests.swift */; };
@@ -38,6 +40,7 @@
 		CF0F21C5ED14ADC9D65DC5E0 /* MikaTunnelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5650509A3EE4563D0A56290E /* MikaTunnelManager.swift */; };
 		D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F484000F83A498BEFACD5A7C /* BrowserView.swift */; };
 		D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80664ECF799D8E00D9FFB99 /* Model.swift */; };
+		DEC6D284AECA54495F9D5FFA /* AgentContinuedExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80CFB5C8EF5C4F8E5A46B84F /* AgentContinuedExecution.swift */; };
 		E087364C6C3FFAF90A49D544 /* LocalAgentRunWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70F8A94EF49FFED8C5EF0E16 /* LocalAgentRunWindow.swift */; };
 		E5919C2C00587145A2FB6E14 /* MikaLiveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331B130A53FF62D48066D613 /* MikaLiveWidget.swift */; };
 		EA613EC4696FDFF559F373BE /* InteractionUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBE308DF2EDF45D2D8F01BC /* InteractionUITests.swift */; };
@@ -113,11 +116,14 @@
 		6DD1BC73166688166B30AD8A /* MikaIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaIOS.swift; sourceTree = "<group>"; };
 		70F8A94EF49FFED8C5EF0E16 /* LocalAgentRunWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAgentRunWindow.swift; sourceTree = "<group>"; };
 		802726CA18DAA6BD0306332E /* LocalControlRunner.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LocalControlRunner.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		80CFB5C8EF5C4F8E5A46B84F /* AgentContinuedExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContinuedExecution.swift; sourceTree = "<group>"; };
 		8D4565181B3F088D659A9042 /* MikaLiveActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaLiveActions.swift; sourceTree = "<group>"; };
+		8F6AFCF369B86B8AEE7E0497 /* AgentExecutionPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentExecutionPreferences.swift; sourceTree = "<group>"; };
 		978A114C3AFDB452C8B6BC09 /* PhoneInteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneInteractionView.swift; sourceTree = "<group>"; };
 		A171E7F91F76B55193D8ACE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A9894E8600600CC09297D7E0 /* RemoteIOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIOSTests.swift; sourceTree = "<group>"; };
 		B8F9FC42D0D8136C5BE47850 /* LocalControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlTests.swift; sourceTree = "<group>"; };
+		B970E9752C1196994A88BDF2 /* BackgroundSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettingsTests.swift; sourceTree = "<group>"; };
 		BD1A31B3BF791CC717E70902 /* MikaCapsule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaCapsule.swift; sourceTree = "<group>"; };
 		C7D3EFF100C3C9326C9381B6 /* LocalControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalControlServer.swift; sourceTree = "<group>"; };
 		CB5ED3FF5922C59BE69EBE83 /* MikaActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaActivityAttributes.swift; sourceTree = "<group>"; };
@@ -201,6 +207,8 @@
 		D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */ = {
 			isa = PBXGroup;
 			children = (
+				80CFB5C8EF5C4F8E5A46B84F /* AgentContinuedExecution.swift */,
+				8F6AFCF369B86B8AEE7E0497 /* AgentExecutionPreferences.swift */,
 				F484000F83A498BEFACD5A7C /* BrowserView.swift */,
 				0DA7737935650160E9074D2C /* ContentView.swift */,
 				A171E7F91F76B55193D8ACE1 /* Info.plist */,
@@ -228,6 +236,7 @@
 		F4464F981BDDDC9B030640F7 /* DeviceControlTests */ = {
 			isa = PBXGroup;
 			children = (
+				B970E9752C1196994A88BDF2 /* BackgroundSettingsTests.swift */,
 				FDAD34B48B3A419910B29423 /* CapsuleTests.swift */,
 				54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */,
 				FEBE308DF2EDF45D2D8F01BC /* InteractionUITests.swift */,
@@ -429,6 +438,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC6D284AECA54495F9D5FFA /* AgentContinuedExecution.swift in Sources */,
+				0E8757F9268BFE6DFE3B91AD /* AgentExecutionPreferences.swift in Sources */,
 				D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */,
 				5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */,
 				BFAD84A066565976221E68FE /* IOSInteractionProbe.swift in Sources */,
@@ -465,6 +476,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FE02046D550EE5C87017096 /* BackgroundSettingsTests.swift in Sources */,
 				4D3A5BE249627709B01DA274 /* CapsuleTests.swift in Sources */,
 				1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */,
 				EA613EC4696FDFF559F373BE /* InteractionUITests.swift in Sources */,

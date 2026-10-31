@@ -19,7 +19,7 @@ extension OnDeviceControl:PhoneControlConnection {
     }
     func ensureReadyIfRequested() async throws {
         guard requested else {return}
-        if ready {return}
+        if ready {try await verifySessionAndReconnectIfNeeded();return}
         restoreIfRequested()
         for _ in 0..<125 {
             try Task.checkCancellation()

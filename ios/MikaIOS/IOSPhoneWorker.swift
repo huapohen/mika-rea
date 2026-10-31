@@ -23,6 +23,9 @@ private final class ReceiverMemoryCredentials:CredentialStore {
         let directory=FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("RemoteAssistance/Threads/"+conversation)
         try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
         let defaults=UserDefaults(suiteName:"com.huapohen.mikaremote.receiver."+conversation)!
+        let execution=AgentExecutionPreferences.load(owner.defaults)
+        defaults.set(execution.mode.rawValue,forKey:"localExecutionMode")
+        defaults.set(execution.returnAfterTask,forKey:"localReturnAfterTask")
         let engine=Model(storage:directory,defaults:defaults,vault:ReceiverMemoryCredentials(),providerSession:owner.providerSession)
         engine.mode="iPhone";engine.base=owner.base;engine.model=owner.model;engine.apiKey=owner.apiKey
         model=engine

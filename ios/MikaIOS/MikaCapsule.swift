@@ -25,6 +25,7 @@ struct MikaCapsuleState:Equatable {
             state.active=true;state.phase="running";state.headline="Mika 正在处理"
             state.detail=model.isRemote ? "正在提交到目标设备" : model.localProgress
             state.canStop = !model.isRemote
+            if model.localBackgroundPaused {state.phase="needsUser";state.headline="后台任务已暂停";state.detail="点此返回 Mika 后继续"}
         } else if !model.lastOutcome.isEmpty {
             state.phase=model.lastOutcome
             state.headline=["done":"任务已完成","failed":"任务未完成","cancelled":"后续处理已停止","detached":"已解除本机关联"][model.lastOutcome] ?? "Mika 随时待命"
@@ -152,6 +153,7 @@ struct MikaCapsuleState:Equatable {
         if let model {state=MikaCapsuleState.read(model)}
         if let received=RemoteIOSReceiver.shared.activeTask {
             state=MikaCapsuleState(id:"received:"+received.id,phase:received.cancelRequested ? "stopping" : received.interaction != nil ? "needsUser" : "running",headline:received.interaction != nil ? "远程协助需要你处理" : "正在执行远程协助",detail:received.cancelRequested ? "正在停止后续操作" : received.progress,target:"iPhone 远程协助",active:true,canStop:!received.cancelRequested)
+            if !received.cancelRequested,RemoteIOSReceiver.shared.executionModel?.localBackgroundPaused==true {state.phase="needsUser";state.headline="远程协助已暂停";state.detail="点此返回 Mika 后继续"}
         }
         if lastAction=="intent_stop_preview",state.active || OnDeviceControl.shared.ready {lastAction=""}
         if mode=="off" {expanded=false}

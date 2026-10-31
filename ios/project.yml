@@ -26,6 +26,8 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         CFBundleDisplayName: Mika
         NSSupportsLiveActivities: true
+        UIBackgroundModes: [processing]
+        BGTaskSchedulerPermittedIdentifiers: [com.huapohen.mikaremote.agent.*]
         CFBundleURLTypes:
           - CFBundleURLName: com.huapohen.mikaremote
             CFBundleURLSchemes: [mikarea]

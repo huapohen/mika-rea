@@ -3,6 +3,7 @@ set -eu
 cd "${0:A:h:h}"
 CARGO_BIN="${CARGO_BIN:-$HOME/.cargo/bin/cargo}"
 RUSTUP_BIN="${RUSTUP_BIN:-$HOME/.cargo/bin/rustup}"
+export IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET:-16.0}"
 "$RUSTUP_BIN" target add aarch64-apple-ios
 "$CARGO_BIN" build --locked --manifest-path ios/local-control/Cargo.toml --target aarch64-apple-ios --lib --release
 mkdir -p ios/Native

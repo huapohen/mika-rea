@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-31",
+  "status": "implemented; real-device continued execution acceptance pending",
+  "default_mode": "background",
+  "default_return_after_task": false,
+  "modes": [
+    "background",
+    "continuous",
+    "compatibility"
+  ],
+  "system_api": "BGContinuedProcessingTask (iOS 26+); immediate-or-fail; CPU/network only",
+  "unit_tests_passed": 27,
+  "simulator_scheduler": {
+    "identifier_registration": "passed",
+    "submission": "unavailable (BGTaskScheduler code 1)",
+    "continued_runtime_granted": false
+  },
+  "simulated_lifecycle_checks": [
+    "granted continuation does not force budget or final foreground returns",
+    "unavailable background time pauses before further UI operations",
+    "owner foreground return resumes the paused task",
+    "old UI snapshots are invalidated after pause/interaction",
+    "pending writes are withheld until a fresh screen is read",
+    "cancelling a paused task does not require foreground return",
+    "expiration prevents queued writes and reports unsuccessful completion"
+  ],
+  "settings_ui": {
+    "platform": "iPhone 15 Pro simulator",
+    "result": "passed: mode selection, disabled compatibility toggle, completion-return preference survives relaunch",
+    "overlay": "disabled through test-only NSArgumentDomain; independent overlay acceptance remains separate"
+  },
+  "signed_device_build": "passed with existing Personal Team; not installed",
+  "phone_operations_during_user_absence": false,
+  "still_required": [
+    "real iPhone grants continued execution",
+    "real UI operations beyond the short background budget",
+    "system UI cancellation on the real device",
+    "foreground recovery after real suspension",
+    "5G-only local-control connection"
+  ]
+}

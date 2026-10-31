@@ -180,6 +180,29 @@ import UniformTypeIdentifiers
         do {return try await request(path:"/control",body:command)}
         catch {detail="操作未获确认，不会自动重复执行。请检查执行器状态。";throw error}
     }
+    private func nativeSessionEnded()->Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        guard let pointer=nativeStatus() else {return true}
+        let data=Data(String(cString:pointer).utf8);nativeStringFree(pointer)
+        guard let value=try? JSONSerialization.jsonObject(with:data) as? [String:String],let status=value["status"] else {return true}
+        return ["failed","stopped"].contains(status)
+        #endif
+    }
+    func verifySessionAndReconnectIfNeeded() async throws {
+        guard requested else {throw Model.Issue.message("本机控制已由你停止，不能自动继续任务。")}
+        if ready,!nativeSessionEnded(),let result=try? await request(path:"/status",body:nil),ready,!nativeSessionEnded(),result["ready"] as? Bool==true {return}
+        guard requested else {throw Model.Issue.message("本机控制已由你停止，不能自动继续任务。")}
+        // Pausing happened between operations. Reconnect the idle session; never
+        // repeat a previous UI command or change the user's explicit stop choice.
+        monitor?.cancel();health?.cancel()
+        #if !targetEnvironment(simulator)
+        nativeStop()
+        #endif
+        ready=false;starting=false
+        try await ensureReadyIfRequested()
+    }
     private func request(path:String,body:[String:Any]?) async throws -> [String:Any] {
         guard !credential.isEmpty else {throw Model.Issue.message("没有本机会话。")}
         var request=URLRequest(url:URL(string:"http://127.0.0.1:8123"+path)!)
@@ -235,7 +258,8 @@ struct LocalControlSetup:View {
     @State private var importing=false
     @State private var importingProxy=false
     @State private var error=""
-    @AppStorage("localSmoothExecution") private var smoothExecution=true
+    @AppStorage("localExecutionMode") private var executionMode=AgentExecutionMode.background.rawValue
+    @AppStorage("localReturnAfterTask") private var returnAfterTask=false
     var body:some View {
         Form {
             Section {
@@ -254,9 +278,13 @@ struct LocalControlSetup:View {
                 TextField("LocalDevVPN 的设备地址",text:$control.host).keyboardType(.decimalPad).textInputAutocapitalization(.never).autocorrectionDisabled().disabled(control.starting || control.ready)
             }
             Section {
-                Toggle("连续操作，减少页面切换",isOn:$smoothExecution).accessibilityIdentifier("smoothLocalExecution")
-                Text("默认停留在目标 App 连续处理，完成后返回 Mika。后台时间不足或需要你回答时会回到 Mika；关闭后使用每步返回的兼容模式。更改从下一项任务生效。")
+                Picker("执行模式",selection:$executionMode) {
+                    ForEach(AgentExecutionMode.allCases) {mode in Text(mode.label).tag(mode.rawValue)}
+                }.accessibilityIdentifier("localExecutionMode").accessibilityValue(AgentExecutionMode(rawValue:executionMode)?.label ?? "后台运行")
+                Toggle("完成后返回 Mika",isOn:$returnAfterTask).disabled(executionMode==AgentExecutionMode.compatibility.rawValue).accessibilityIdentifier("localReturnAfterTask")
+                Text(executionMode==AgentExecutionMode.background.rawValue ? "默认后台运行，停留在目标 App。系统无法继续提供后台时间时会暂停，点胶囊回到 Mika 后继续；不会通过反复切页维持运行。需要你回答时会返回。" : executionMode==AgentExecutionMode.continuous.rawValue ? "连续操作期间停留在目标 App，后台时间不足时返回 Mika 续接。" : "兼容模式每一步都返回 Mika，再处理下一步。")
                     .font(.footnote).foregroundStyle(.secondary)
+                Text("更改从下一项任务生效。系统取消或锁屏等中断不会被当作任务完成。").font(.footnote).foregroundStyle(.secondary)
                 Button(control.starting ? "正在启动…" : "启动本机控制") {control.start()}.disabled(control.starting || control.ready || !control.hasPairing).accessibilityIdentifier("startLocalControl")
                 Button("验证：打开设置并读屏") {Task {await control.smokeTest()}}.disabled(!control.ready)
                 Button("停止本机控制",role:.destructive) {Task {await control.stop()}}

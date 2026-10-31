@@ -70,6 +70,7 @@ struct RemoteTaskSummary: Identifiable {
     var interactionChanged:((PhoneInteraction?) throws -> Void)?
     @Published private(set) var workID=""
     @Published var localProgress=""
+    @Published var localBackgroundPaused=false
     @Published private(set) var lastOutcome=""
     private var localRequest:Task<Void,Error>?
     @Published var cancelling = false
@@ -228,9 +229,9 @@ struct RemoteTaskSummary: Identifiable {
             do {try await respondToInteraction(text,expectedID:item.id)} catch {localError=error.localizedDescription}
             return
         }
-        workID=UUID().uuidString;lastOutcome="";localProgress="正在思考"
+        workID=UUID().uuidString;lastOutcome="";localProgress="正在思考";localBackgroundPaused=false
         add("user",text); busy=true
-        defer { busy=false }
+        defer { busy=false;localBackgroundPaused=false }
         do {
             if let task = remoteTask {
                 guard task.status == "waiting_for_answer" else { return }
@@ -265,6 +266,12 @@ struct RemoteTaskSummary: Identifiable {
         }
     }
     var capsuleOperationID:String {remoteTask?.id ?? workID}
+    func cancelLocalWorkForSystemExpiration() {
+        localBackgroundPaused=false
+        localProgress="系统已停止后台任务，未派发后续操作"
+        localRequest?.cancel()
+        if let item=localInteraction {interactionGate.cancel(item.id)}
+    }
     func respondToInteraction(_ text:String,expectedID:String) async throws {
         if let item=localInteraction,item.id==expectedID {
             try interactionGate.respond(id:expectedID,text:text,source:.owner)
