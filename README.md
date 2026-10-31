@@ -7,7 +7,7 @@
 - `relay/`：带设备与控制端令牌鉴权的中继服务原型。
 - `app/`、`core/`：上游 Mika Android 项目源码。
 
-当前状态：iPhone 主要界面已在 iPhone 15 Pro 真机测试和安装。中继端到端测试尚未通过，公网部署未完成；不支持脱离 Mac 后对 iOS 任意第三方 App 的全局控制。详细功能和限制见 [iOS 说明](ios/README.md)。
+当前状态：iPhone 主要界面已在 iPhone 15 Pro 真机测试和安装。公网中继已部署，iPhone→中继→安卓 Mika 的模型任务往返已通过真机测试；“打开系统设置并读取 Android 版本”的实际 App 操作也已通过真机联调；不支持脱离 Mac 后对 iOS 任意第三方 App 的全局控制。详细功能和限制见 [iOS 说明](ios/README.md)。
 
 本机配对配置、API Key、令牌与构建产物不纳入版本管理。
 

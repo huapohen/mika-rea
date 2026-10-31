@@ -26,4 +26,6 @@
 
 验证：`DeviceControlTests.testNavigationAndInput` 在 iPhone 15 Pro 模拟器和已连接的 iPhone 15 Pro 真机均通过，覆盖打开菜单、设置→模型→返回、设备连接页→返回、文本输入及发送按钮状态。截图见 `evidence/home.png`。
 
-远程中继服务代码在 `relay/`，安卓连接助手在 `android-bridge/`。首轮中继端到端测试未通过，尚未部署 `qinziduihua.com/mika-rea`；界面更新不代表公网控制已经验证完成。
+远程中继服务代码在 `relay/`，安卓连接助手在 `android-bridge/`。中继已部署至 `https://qinziduihua.com/mika-rea`，`testRelayAndroid` 在 iPhone 15 Pro 真机通过，验证了模型任务经公网中继到达安卓并返回结果。`testRelayPhoneControl` 也在 iPhone 15 Pro 真机通过，完成了打开安卓系统设置并返回版本的任务。
+
+模型配置已支持从设备本地一次性导入文件存入钥匙串，导入后删除临时文件。`testConfiguredProvider` 在 iPhone 15 Pro 真机测试通过，确认 DeepSeek 模型列表请求成功。凭据不进入仓库。

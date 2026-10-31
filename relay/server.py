@@ -1,5 +1,5 @@
 """Mika outbound relay. Run behind TLS (Caddy); no API/model keys required."""
-import argparse, hashlib, hmac, json, queue, secrets, threading, time
+import argparse, hmac, json, queue, secrets, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -48,6 +48,13 @@ class Relay:
             return True
 
 class Handler(BaseHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        self.connection.settimeout(65)
+    def do_GET(self):
+        if self.path.rstrip('/') in ('', '/health'):
+            return self.send_json(200, {'service':'mika-rea','status':'ok','version':1})
+        self.send_json(404, {'error':'Not found'})
     def log_message(self, *args): pass # Never log request bodies, auth, or phone contents.
     def send_json(self, status, value):
         data = json.dumps(value,ensure_ascii=False).encode()
@@ -60,7 +67,8 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts)!=3 or parts[0]!='v1' or parts[2] not in ('rpc','next','result','status'): return self.send_json(404,{'error':'Not found'})
             _, device, action = parts
             role = 'agent' if action in ('next','result') else 'client'
-            token = self.headers.get('Authorization','').removeprefix('Bearer ')
+            authorization = self.headers.get('Authorization','')
+            token = authorization[7:] if authorization.startswith('Bearer ') else ''
             if not self.server.relay.auth(device,token,role): return self.send_json(401,{'error':'Unauthorized'})
             length = int(self.headers.get('Content-Length','0'))
             if length<0 or length>MAX_BODY: return self.send_json(413,{'error':'Payload too large'})

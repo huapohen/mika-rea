@@ -34,6 +34,18 @@ final class DeviceControlTests: XCTestCase {
         test.tap()
         XCTAssertTrue(app.staticTexts["已连接 · 主模型可用"].waitForExistence(timeout:30))
     }
+    func testRelayPhoneControl() throws {
+        let app = XCUIApplication(bundleIdentifier:"com.huapohen.mikaremote")
+        app.launch()
+        XCTAssertTrue(app.buttons["新对话"].waitForExistence(timeout:15))
+        app.buttons["新对话"].tap()
+        let input=app.descendants(matching:.any).matching(identifier:"taskInput").firstMatch
+        input.tap()
+        input.typeText("Open Android Settings. Read the Android version from the system UI. Do not change any settings.")
+        app.buttons["发送"].tap()
+        let answer=app.staticTexts.matching(NSPredicate(format:"label CONTAINS %@", "16")).firstMatch
+        XCTAssertTrue(answer.waitForExistence(timeout:180))
+    }
     func testRelayAndroid() throws {
         let app = XCUIApplication(bundleIdentifier: "com.huapohen.mikaremote")
         app.launch()
