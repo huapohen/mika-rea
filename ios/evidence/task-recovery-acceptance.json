@@ -1,0 +1,10 @@
+{
+  "test_suite": "TaskRecoveryTests",
+  "result": "2 passed; 0 failures",
+  "cases": [
+    "restart preserves original task endpoint, credential and chat ownership; no task resubmission",
+    "uncertain submission warns without retry; public plain HTTP is rejected"
+  ],
+  "test_transport": "URLProtocol integration fixture; no real credentials",
+  "date": "2026-10-31"
+}

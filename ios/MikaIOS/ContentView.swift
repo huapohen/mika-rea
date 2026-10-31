@@ -13,22 +13,23 @@ struct ContentView: View {
     @State private var destination: String?
     @State private var importing = false
     @State private var fileError = ""
+    @State private var detachingTask=false
     @FocusState private var focused: Bool
-    private let examples: [(String,String)] = [
-        ("app.badge","打开设置，告诉我安卓版本是多少"),
+    private var examples: [(String,String)] { [
+        ("app.badge",model.mode == "安卓" ? "打开设置，告诉我安卓版本是多少" : "打开设置，告诉我 iOS 版本是多少"),
         ("globe","打开 Hacker News，读出首页前 5 条新闻"),
         ("doc.text","帮我总结当前网页的主要内容"),
         ("clock","帮我订明天早上 9:40 的闹钟"),
-        ("bubble.left.and.bubble.right","先告诉我你能在这台设备上做什么")]
+        ("bubble.left.and.bubble.right","先告诉我你能在这台设备上做什么")] }
     var body: some View {
         ZStack(alignment:.leading) {
             NavigationStack {
                 VStack(spacing:0) {
                     HStack(spacing:8) {
                         Circle().fill(model.mode == "安卓" ? Color.mikaBlue : Color.green).frame(width:6,height:6)
-                        Text(model.mode == "安卓" ? "安卓 Mika · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手")).font(.caption).foregroundStyle(.secondary)
+                        Text(model.remoteTask?.connection.label ?? (model.mode == "安卓" ? "安卓 Mika · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手"))).font(.caption).foregroundStyle(.secondary)
                         Spacer()
-                        Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" } } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备")
+                        Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" } } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备").disabled(model.busy || !model.taskID.isEmpty)
                     }.padding(.horizontal,22)
                     ScrollViewReader { proxy in
                         ScrollView {
@@ -60,6 +61,9 @@ struct ContentView: View {
                 sidebar.frame(width:300).background(Color(uiColor:.systemBackground)).transition(.move(edge:.leading))
             }
         }.tint(.mikaBlue)
+            .confirmationDialog("解除任务关联",isPresented:$detachingTask,titleVisibility:.visible) {
+                Button("仅解除本机关联",role:.destructive) {model.detachTask()}
+            } message:{Text("目标设备上的任务可能继续执行。你可以在连接页查看并接回任务。")}
             .task {
                 await localControl.runDeveloperProbeIfRequested()
                 #if DEBUG
@@ -68,6 +72,12 @@ struct ContentView: View {
                     await model.send("打开本机系统设置，进入通用、关于本机，读取当前 iOS 版本后返回 Mika。不要更改任何设置。")
                     let result:[String:Any]=["tools":model.localToolTrace,"reply":model.messages.last?.text ?? "","timestamp":ISO8601DateFormatter().string(from:Date())]
                     let path=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalAgentAcceptance.json")
+                    if let data=try? JSONSerialization.data(withJSONObject:result,options:[.sortedKeys]) {try? data.write(to:path,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
+                }
+                if ProcessInfo.processInfo.arguments.contains("--mika-remote-connection-probe") {
+                    await model.loadRemoteTasks()
+                    let result:[String:Any]=["status":model.connectionStatus,"task_count":model.remoteTasks.count,"timestamp":ISO8601DateFormatter().string(from:Date())]
+                    let path=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("RemoteConnectionAcceptance.json")
                     if let data=try? JSONSerialization.data(withJSONObject:result,options:[.sortedKeys]) {try? data.write(to:path,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
                 }
                 #endif
@@ -94,14 +104,19 @@ struct ContentView: View {
     private var greeting: String { let hour=Calendar.current.component(.hour,from:Date());return hour<12 ? "上午好" : hour<18 ? "下午好" : "晚上好" }
     private var composer: some View {
         VStack(spacing:8) {
+            if !model.localError.isEmpty { HStack {Text(model.localError).font(.caption).foregroundStyle(.red);Spacer();Button("关闭") {model.localError=""}}.padding(.horizontal,20) }
             if !model.taskID.isEmpty {
-                HStack { Text(model.waiting ? "Mika 需要你的回答" : "有正在执行的任务").font(.caption);Spacer();if !model.busy {Button("查看") { Task { await model.resumeTask() } }};Button("停止",role:.destructive) { Task { await model.cancelTask() } } }.padding(.horizontal,20)
+                VStack(alignment:.leading,spacing:5) {
+                    HStack { Text(model.waiting ? "Mika 需要你的回答" : "目标设备任务").font(.caption.bold());Spacer();if !model.busy {Button("查看") { Task { await model.resumeTask() } }};Button(model.cancelling ? "正在停止…" : "停止",role:.destructive) { Task { await model.cancelTask() } }.disabled(model.cancelling) }
+                    Text(model.taskProgress).font(.caption).foregroundStyle(.secondary).lineLimit(3).accessibilityIdentifier("taskProgress")
+                    if !model.busy {Button("解除本机关联") {detachingTask=true}.font(.caption)}
+                }.padding(.horizontal,20)
             }
             if !model.pageText.isEmpty { HStack { Label("已附加阅读内容",systemImage:"doc.text");Spacer();Button("移除") {model.pageText=""} }.font(.caption).padding(.horizontal,20) }
             HStack(alignment:.bottom,spacing:10) {
                 Menu { Button("打开浏览器",systemImage:"globe") { open("浏览器") };Button("添加文本文件",systemImage:"doc") {importing=true} } label: { Image(systemName:"plus").font(.title3).foregroundStyle(.secondary).frame(width:40,height:44) }.accessibilityLabel("添加附件")
                 TextField("说说想做的事…",text:$input,axis:.vertical).lineLimit(1...5).focused($focused).accessibilityIdentifier("taskInput").padding(.vertical,12)
-                Button { let text=input; input="";focused=false;Task {await model.send(text)} } label: { Image(systemName:"arrow.up").font(.system(size:18,weight:.semibold)).foregroundStyle(.white).frame(width:38,height:38).background(input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || model.busy ? Color.gray.opacity(0.35) : Color.mikaBlue).clipShape(Circle()) }.accessibilityLabel("发送").disabled(model.busy || input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty).padding(.bottom,4)
+                Button { let text=input; input="";focused=false;Task {await model.send(text)} } label: { Image(systemName:"arrow.up").font(.system(size:18,weight:.semibold)).foregroundStyle(.white).frame(width:38,height:38).background(input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || !model.canSend ? Color.gray.opacity(0.35) : Color.mikaBlue).clipShape(Circle()) }.accessibilityLabel("发送").disabled(!model.canSend || input.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty).padding(.bottom,4)
             }.padding(.trailing,8).background(Color(uiColor:.secondarySystemGroupedBackground)).clipShape(RoundedRectangle(cornerRadius:25)).overlay(RoundedRectangle(cornerRadius:25).stroke(Color.primary.opacity(0.06))).padding(.horizontal,14)
         }.padding(.vertical,10).background(.ultraThinMaterial)
     }

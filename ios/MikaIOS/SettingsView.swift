@@ -58,7 +58,21 @@ struct ConnectionSettings: View {
             } else {
                 Section {TextField("MCP 地址",text:$model.mcp).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL);SecureField("访问令牌",text:$model.token).textInputAutocapitalization(.never).autocorrectionDisabled()} header: {Text("安卓 Mika MCP")} footer: {Text("在安卓 Mika 设置 → 电脑连接（MCP）中开启 Wi-Fi 和私有网络，填写显示的地址和令牌。")}
             }
-            Section {Button {Task {testing=true;defer {testing=false};do {_ = try await model.call("mika_list_tasks",["limit":1]);status="已连接 · 目标 Mika 响应正常"} catch {status=error.localizedDescription}}} label: {HStack {Text(testing ? "正在检查…" : "检查连接");Spacer();if testing {ProgressView()}}}.disabled(testing);if !status.isEmpty {Text(status).font(.footnote)}}
-        }.disabled(model.busy || !model.taskID.isEmpty).navigationTitle("手机操作").navigationBarTitleDisplayMode(.inline)
+            Section {
+                Button {Task {await model.loadRemoteTasks()}} label: {HStack {Text(model.loadingRemoteTasks ? "正在检查…" : "查看已有任务 / 检查连接");Spacer();if model.loadingRemoteTasks {ProgressView()}}}.disabled(model.loadingRemoteTasks)
+                if !model.connectionStatus.isEmpty {Text(model.connectionStatus).font(.footnote)}
+            }
+            if !model.remoteTasks.isEmpty {
+                Section("目标设备的最近任务") {
+                    ForEach(model.remoteTasks) { task in
+                        VStack(alignment:.leading,spacing:5) {
+                            Text(task.goal).lineLimit(2)
+                            Text(task.status).font(.caption).foregroundStyle(.secondary)
+                            Button("接回此任务") {Task {await model.adoptRemoteTask(task.id)}}.disabled(model.remoteTask != nil || model.busy)
+                        }
+                    }
+                }
+            }
+        }.disabled(model.busy).navigationTitle("手机操作").navigationBarTitleDisplayMode(.inline)
     }
 }

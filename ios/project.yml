@@ -4,6 +4,17 @@ options:
   deploymentTarget:
     iOS: '16.0'
 targets:
+  MikaUnitTests:
+    deploymentTarget: '17.0'
+    type: bundle.unit-test
+    platform: iOS
+    sources: [MikaUnitTests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote.unit-tests
+    dependencies:
+      - target: MikaIOS
   MikaIOS:
     type: application
     platform: iOS
@@ -54,6 +65,13 @@ targets:
     dependencies:
       - target: MikaIOS
 schemes:
+  MikaUnitTests:
+    build:
+      targets:
+        MikaIOS: all
+        MikaUnitTests: [test]
+    test:
+      targets: [MikaUnitTests]
   LocalControl:
     build:
       targets:
