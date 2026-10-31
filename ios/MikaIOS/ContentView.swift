@@ -69,8 +69,11 @@ struct ContentView: View {
                 #if DEBUG
                 if localControl.ready,ProcessInfo.processInfo.arguments.contains("--mika-local-agent-probe") {
                     model.mode="iPhone";model.newChat()
-                    await model.send("打开本机系统设置，进入通用、关于本机，读取当前 iOS 版本后返回 Mika。不要更改任何设置。")
-                    let result:[String:Any]=["tools":model.localToolTrace,"reply":model.messages.last?.text ?? "","timestamp":ISO8601DateFormatter().string(from:Date())]
+                    let arguments=ProcessInfo.processInfo.arguments
+                    let index=arguments.firstIndex(of:"--mika-agent-goal")
+                    let goal=index.flatMap {$0+1<arguments.count ? arguments[$0+1] : nil} ?? "打开本机系统设置，进入通用、关于本机，读取当前 iOS 版本后返回 Mika。不要更改任何设置。"
+                    await model.send(goal)
+                    let result:[String:Any]=["tools":model.localToolTrace,"targets":model.localToolTargets,"reply":model.messages.last?.text ?? "","timestamp":ISO8601DateFormatter().string(from:Date())]
                     let path=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("LocalAgentAcceptance.json")
                     if let data=try? JSONSerialization.data(withJSONObject:result,options:[.sortedKeys]) {try? data.write(to:path,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
                 }

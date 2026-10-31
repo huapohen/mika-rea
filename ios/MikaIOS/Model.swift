@@ -62,6 +62,7 @@ struct RemoteTaskSummary: Identifiable {
     @Published var selectedChat = UUID().uuidString { didSet { defaults.set(selectedChat,forKey:"selectedChat") } }
     @Published var messages: [Message] = [] { didSet { saveHistory() } }
     var localToolTrace:[String]=[]
+    var localToolTargets:[String]=[]
     @Published var busy = false
     @Published var cancelling = false
     @Published var pageText = ""

@@ -1,0 +1,17 @@
+{
+  "device": "iPhone 15 Pro",
+  "os": "iOS 26.6.2",
+  "timestamp": "2026-10-31T07:45:04Z",
+  "target": "com.nebula.clashmi",
+  "confirmed_actions": [
+    "launch_app:com.nebula.clashmi",
+    "read_screen:com.nebula.clashmi",
+    "tap:com.nebula.clashmi",
+    "read_screen:com.nebula.clashmi",
+    "launch_app:com.huapohen.mikaremote"
+  ],
+  "observed_result": "Opened About by tapping its UI; read installed App version 1.0.31.1703; returned to Mika",
+  "vpn_changed": false,
+  "configuration_changed": false,
+  "runtime": "phone-side RemotePairing/RSD/XCTest; no Mac XCTest driver"
+}
