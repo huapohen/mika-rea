@@ -7,7 +7,7 @@
 - `relay/`：带设备与控制端令牌鉴权的中继服务原型。
 - `app/`、`core/`：上游 Mika Android 项目源码。
 
-当前状态：iPhone 主要界面和公网安卓任务已通过真机联调。新增 iPhone 自启动执行器，本机启动 App、读屏、点按、输入、滑动已在 iPhone 15 Pro / iOS 26.6.2 验收通过，当前使用 LocalDevVPN。代理与本地隧道的合并实现已通过内核测试及 iOS 编译，真机安装仍需支持 Network Extensions 的开发团队。远程控制另一台 iPhone 和 Android Mika 的全部功能移植尚未完成。详细结果见 [iOS 说明](ios/README.md)。
+当前状态：iPhone 主要界面和公网安卓任务已通过真机联调。iPhone 自启动执行器的本机启动 App、读屏、点按、输入、滑动已在 iPhone 15 Pro / iOS 26.6.2 验收通过，当前使用 LocalDevVPN。新增应用内悬浮胶囊、灵动岛与锁屏实时活动，以及默认关闭的 iPhone 远程受控端；模拟器 iOS 客户端经公网中继操作真实 iPhone、回传结果和胶囊停止已通过。两台实体 iPhone、真实跨省网络及 Android Mika 全部功能移植仍待完成。代理与本地隧道合并实现已通过内核测试及 iOS 编译，真机安装仍需支持 Network Extensions 的开发团队。详细结果见 [iOS 说明](ios/README.md)。
 
 本机配对配置、API Key、令牌与构建产物不纳入版本管理。
 

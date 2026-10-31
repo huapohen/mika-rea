@@ -13,7 +13,7 @@ struct MikaCapsuleState:Equatable {
     var needsUser:Bool {phase=="needsUser" || phase=="failed"}
     @MainActor static func read(_ model:Model)->Self {
         var state=Self();state.id=model.capsuleOperationID
-        state.target=model.remoteTask != nil || model.mode=="安卓" ? "安卓 Mika" : "iPhone 本机"
+        state.target=model.remoteTask?.connection.label ?? model.targetLabel
         if let remote=model.remoteTask {
             state.id=remote.id;state.active=true;state.canStop = !model.cancelling
             if model.cancelling {state.phase="stopping";state.headline="正在停止任务";state.detail="等待目标设备确认"}
@@ -21,8 +21,8 @@ struct MikaCapsuleState:Equatable {
             else {state.phase="running";state.headline=model.busy ? "Mika 正在处理" : "任务待查看";state.detail=model.busy ? "正在查看目标设备进度" : "打开 Mika 恢复查看进度"}
         } else if model.busy {
             state.active=true;state.phase="running";state.headline="Mika 正在处理"
-            state.detail=model.mode=="安卓" ? "正在提交到目标设备" : model.localProgress
-            state.canStop=model.mode != "安卓"
+            state.detail=model.isRemote ? "正在提交到目标设备" : model.localProgress
+            state.canStop = !model.isRemote
         } else if !model.lastOutcome.isEmpty {
             state.phase=model.lastOutcome
             state.headline=["done":"任务已完成","failed":"任务未完成","cancelled":"后续处理已停止","detached":"已解除本机关联"][model.lastOutcome] ?? "Mika 随时待命"
@@ -119,6 +119,7 @@ struct MikaCapsuleState:Equatable {
         self.model=model;subscriptions=[]
         model.objectWillChange.sink { [weak self] in Task { @MainActor in self?.refresh() }}.store(in:&subscriptions)
         OnDeviceControl.shared.objectWillChange.sink { [weak self] in Task { @MainActor in self?.refresh() }}.store(in:&subscriptions)
+        RemoteIOSReceiver.shared.objectWillChange.sink { [weak self] in Task { @MainActor in self?.refresh() }}.store(in:&subscriptions)
         ensureBridge()
         if pulse==nil {
             pulse=Task { [weak self] in
@@ -143,6 +144,9 @@ struct MikaCapsuleState:Equatable {
     func setForeground(_ active:Bool) {foreground=active;window?.isHidden = !active || !bubbleVisible;if active {showWindow();refresh()}}
     func refresh() {
         if let model {state=MikaCapsuleState.read(model)}
+        if let received=RemoteIOSReceiver.shared.activeTask {
+            state=MikaCapsuleState(id:"received:"+received.id,phase:received.cancelRequested ? "stopping" : "running",headline:"正在执行远程协助",detail:received.cancelRequested ? "正在停止后续操作" : received.progress,target:"iPhone 远程协助",active:true,canStop:!received.cancelRequested)
+        }
         if lastAction=="intent_stop_preview",state.active || OnDeviceControl.shared.ready {lastAction=""}
         if mode=="off" {expanded=false}
         window?.isHidden = !foreground || !bubbleVisible
@@ -187,7 +191,11 @@ struct MikaCapsuleState:Equatable {
             refresh();return
         }
         let control=OnDeviceControl.shared
-        if id=="session:"+control.sessionIdentifier,control.ready,!MikaCapsuleState.read(model ?? Model()).active {
+        let receiver=RemoteIOSReceiver.shared
+        if let received=receiver.activeTask,id=="received:"+received.id {
+            lastAction="intent_stop_received";await receiver.tasks.cancel(received.id);refresh();return
+        }
+        if id=="session:"+control.sessionIdentifier,control.ready,receiver.activeTask==nil,!MikaCapsuleState.read(model ?? Model()).active {
             lastAction="intent_stop_session";await control.stop();refresh();return
         }
         let active=model ?? Model()

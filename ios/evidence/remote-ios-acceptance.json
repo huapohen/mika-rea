@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-31",
+  "controller": "iOS Simulator / iPhone 15 Pro profile",
+  "receiver": "physical iPhone 15 Pro / iOS 26.6.2",
+  "relay": "https://qinziduihua.com/mika-rea",
+  "execution": "receiver-side model and on-device XCTest; no Mac XCTest session or control gateway for receiver actions",
+  "checks": {
+    "remote_clashmi_version": "1.0.31.1703",
+    "remote_ios_version": "26.6.2",
+    "controller_recovered_existing_result_without_resubmission": true,
+    "controller_capsule_cancel_confirmed_by_receiver": true,
+    "receiver_capsule_phase": "running",
+    "receiver_system_phase": "running",
+    "receiver_system_activity_count": 1,
+    "navigation_and_input_ui_test": true,
+    "ios_unit_tests_passed": 7,
+    "relay_tests_passed": 5
+  },
+  "lifecycle": {
+    "receiving_default": "off; explicit local enable required on each app session",
+    "interrupted_work": "record failed; never automatically replay",
+    "duplicate_request_id": "return original task; reject changed content",
+    "concurrent_device_jobs": "one at a time"
+  },
+  "scope_limits": [
+    "Not two physical iPhones",
+    "No actual interprovincial/mobile-network field test",
+    "Unlocked phone and foreground Mika required; brief target-app switches return to Mika",
+    "LocalDevVPN still required in free-team standard build",
+    "Structured waiting_for_answer/mika_answer handoff not implemented"
+  ],
+  "installed_runtime": {
+    "local_control_ready": true,
+    "receiving_enabled": false,
+    "system_activity_count": 1,
+    "system_phase": "ready",
+    "timestamp": "2026-10-31T08:49:15Z"
+  }
+}

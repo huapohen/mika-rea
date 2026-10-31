@@ -2,6 +2,10 @@ import concurrent.futures
 import json
 import http.client
 import threading
+import tempfile
+import subprocess
+import sys
+from pathlib import Path
 import unittest
 import urllib.error
 import urllib.request
@@ -50,4 +54,26 @@ class RelayTests(unittest.TestCase):
     def test_expired_request_is_removed(self):
         with self.assertRaises(TimeoutError):self.relay.request('one',{'method':'initialize'},timeout=0.01)
         self.assertEqual({},self.relay.pending)
+    def test_provision_ios_preserves_other_devices_and_keeps_roles_separate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config=Path(directory)/'relay.json'
+            config.write_text(json.dumps({'devices':{'existing':{'platform':'android','client_token':'preserve-client','agent_token':'preserve-agent'}}}))
+            command=[sys.executable,str(Path(__file__).with_name('server.py')),'--config',str(config),'--create-device','iphone','--platform','ios']
+            result=subprocess.run(command,capture_output=True,text=True,check=True)
+            saved=json.loads(config.read_text())['devices']
+            self.assertEqual(0o600,config.stat().st_mode & 0o777)
+            self.assertEqual('preserve-agent',saved['existing']['agent_token'])
+            self.assertEqual('ios',saved['iphone']['platform'])
+            self.assertNotEqual(saved['iphone']['agent_token'],saved['iphone']['client_token'])
+            self.assertNotIn(saved['iphone']['agent_token'],result.stdout+result.stderr)
+            self.assertNotEqual(0,subprocess.run(command,capture_output=True).returncode)
+            self.assertEqual(saved,json.loads(config.read_text())['devices'])
+            output=Path(directory)/'phone-pairing'
+            result=subprocess.run([sys.executable,str(Path(__file__).with_name('export_pairing.py')),'--config',str(config),'--device','iphone','--relay','https://example.test/mika-rea','--output',str(output)],capture_output=True,text=True,check=True)
+            for role,other in [('client','agent'),('agent','client')]:
+                path=output/(role+'.json');value=json.loads(path.read_text())
+                self.assertEqual(role,value['role']);self.assertEqual('ios',value['platform'])
+                self.assertEqual(0o600,path.stat().st_mode & 0o777)
+                self.assertNotIn(other+'_token',value)
+                self.assertNotIn(saved['iphone'][role+'_token'],result.stdout+result.stderr)
 if __name__=='__main__':unittest.main()

@@ -64,6 +64,7 @@ struct RemoteTaskSummary: Identifiable {
     var localToolTrace:[String]=[]
     var localToolTargets:[String]=[]
     @Published var busy = false
+    @Published var receivingRemoteWork = false
     @Published private(set) var workID=""
     @Published var localProgress=""
     @Published private(set) var lastOutcome=""
@@ -85,7 +86,9 @@ struct RemoteTaskSummary: Identifiable {
     private var monitorGeneration = 0
     var taskID: String { remoteTask?.id ?? "" }
     var waiting: Bool { remoteTask?.status == "waiting_for_answer" }
-    var canSend: Bool { !busy && (remoteTask == nil || waiting) }
+    var isRemote:Bool {mode != "iPhone"}
+    var targetLabel:String {mode == "远程 iPhone" ? "远程 iPhone" : mode == "安卓" ? "安卓 Mika" : "iPhone 本机"}
+    var canSend: Bool { !receivingRemoteWork && !busy && (remoteTask == nil || waiting) }
     var taskProgress: String { remoteTask?.progress ?? "" }
     private var historyURL: URL { storage.appendingPathComponent("conversations.json") }
     private var taskURL: URL { storage.appendingPathComponent("active-task.json") }
@@ -127,14 +130,18 @@ struct RemoteTaskSummary: Identifiable {
         if let data = try? Data(contentsOf:bootstrap), let config = try? JSONSerialization.jsonObject(with:data) as? [String:String] {
             if let value = config["relay"] { relayURL=value; transport="中继"; mode="安卓" }
             if let value = config["device"] { deviceID=value }
-            if let value = config["client_token"] { relayToken=value; vault.set("relay",value) }
+            if let value = config["client_token"] {
+                if vault.set("relay",value) {relayToken=value}
+                else {localError="配对令牌无法写入钥匙串，请解锁并使用已签名的构建后重试。"}
+            }
             if let value = config["provider_base"] { base=value }
             if let value = config["provider_model"] { model=value }
             if let value = config["provider_api_key"], !value.isEmpty {
                 if vault.set("api",value) { apiKey=value; mode="iPhone" }
                 else { localError="钥匙串写入失败，请解锁设备后重试。" }
             }
-            if let value = config["mode"], ["iPhone","安卓"].contains(value) { mode=value }
+            if let value = config["mode"], ["iPhone","安卓","远程 iPhone"].contains(value) { mode=value }
+            if config["platform"] == "ios",config["client_token"] != nil {mode="远程 iPhone"}
             if localError.isEmpty { try? FileManager.default.removeItem(at:bootstrap) }
         }
         if let legacy = defaults.string(forKey:"activeTask"), !legacy.isEmpty, remoteTask == nil {
@@ -162,15 +169,25 @@ struct RemoteTaskSummary: Identifiable {
         } catch { localError="任务记录保存失败，重启前请记下任务编号。" }
     }
     func newChat() {
-        guard !busy,remoteTask == nil else { return }
+        guard !receivingRemoteWork,!busy,remoteTask == nil else { return }
         selectedChat=UUID().uuidString; conversation=""; conversationEndpoint=""; messages=[]; pageText=""
     }
     func selectChat(_ id: String) {
-        guard !busy,remoteTask == nil,let chat=chats.first(where:{$0.id == id}) else { return }
+        guard !receivingRemoteWork,!busy,remoteTask == nil,let chat=chats.first(where:{$0.id == id}) else { return }
         selectedChat=id; conversation=chat.conversation ?? ""; conversationEndpoint=chat.remoteEndpoint ?? ""; messages=chat.messages; pageText=""
     }
     func add(_ role: String,_ text: String) { messages.append(Message(role:role,text:text)) }
+    func importControllerConfiguration(_ data:Data) throws {
+        guard !busy,!receivingRemoteWork,remoteTask==nil,data.count<=8192,
+              let config=try JSONSerialization.jsonObject(with:data) as? [String:String],config["role"]=="client",
+              let relay=config["relay"],let device=config["device"],let credential=config["client_token"],
+              ["ios","android"].contains(config["platform"] ?? ""),credential.count>=32,!credential.contains("\r"),!credential.contains("\n") else {throw Issue.message("请选择有效的控制端配置，并先结束当前任务")}
+        _ = try RemoteConnection.make(transport:"中继",direct:"",relay:relay,device:device)
+        guard URL(string:relay)?.scheme=="https",vault.set("relay",credential) else {throw Issue.message("需要 HTTPS 中继且令牌能够写入钥匙串")}
+        relayURL=relay;deviceID=device;relayToken=credential;transport="中继";mode=config["platform"]=="ios" ? "远程 iPhone" : "安卓"
+    }
     private func selectedConnection() throws -> (RemoteConnection,String) {
+        if mode == "远程 iPhone",transport != "中继" {throw Issue.message("远程 iPhone 请使用公网 HTTPS 中继")}
         let connection = try RemoteConnection.make(transport:transport,direct:mcp,relay:relayURL,device:deviceID)
         let credential = transport == "中继" ? relayToken : token
         guard !credential.isEmpty else { throw RemoteError.missingCredential }
@@ -194,9 +211,10 @@ struct RemoteTaskSummary: Identifiable {
                 guard task.status == "waiting_for_answer" else { return }
                 _ = try await taskCall("mika_answer",["task_id":task.id,"text":text],task:task)
                 await poll()
-            } else if mode == "安卓" {
+            } else if isRemote {
                 let (connection,credential)=try selectedConnection()
                 var arguments: [String:Any] = ["goal":text]
+                if mode == "远程 iPhone" {arguments["request_id"]=UUID().uuidString}
                 if !conversation.isEmpty,conversationEndpoint == connection.endpoint.absoluteString { arguments["conversation"]=conversation }
                 let result=try await client.call("mika_run_task",arguments:arguments,connection:connection,credential:credential)
                 guard let id=result["task_id"] as? String,!id.isEmpty else { throw RemoteError.malformed }
@@ -289,7 +307,7 @@ struct RemoteTaskSummary: Identifiable {
                 case "failed": lastOutcome="failed";add("assistant",response["reason"] as? String ?? "任务未完成。");remoteTask=nil;return
                 case "cancelled": lastOutcome="cancelled";add("assistant","任务已停止。");remoteTask=nil;return
                 case "waiting_for_answer": add("assistant",response["question"] as? String ?? "目标 Mika 需要你的回答。");return
-                case "waiting_on_phone": add("assistant","请在目标安卓手机上完成需要本人处理的操作，然后点击「查看」。");return
+                case "waiting_on_phone": add("assistant","请在目标手机上完成需要本人处理的操作，然后点击「查看」。");return
                 default: break
                 }
                 response=try await taskCall("mika_wait_task",["task_id":initial.id,"timeout_s":10],task:initial)
@@ -314,7 +332,7 @@ struct RemoteTaskSummary: Identifiable {
         } catch { connectionStatus=error.localizedDescription; remoteTasks=[] }
     }
     func adoptRemoteTask(_ id: String) async {
-        guard remoteTask == nil,!busy else { return }
+        guard !receivingRemoteWork,remoteTask == nil,!busy else { return }
         busy=true; defer { busy=false }
         do {
             let (connection,credential)=try selectedConnection()

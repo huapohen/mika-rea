@@ -31,7 +31,7 @@ MIKA_IOS_VARIANT=all-in-one MIKA_TEAM_ID=<团队 ID> \
 
 ## 仍需完成
 
-本项目尚不是 Android Mika 全功能的逐项移植。远程控制另一台 iPhone、手机重启后的恢复、重签更新流程、Clash Mi 全部订阅/节点管理界面，以及 iOS 的文件沙箱、定时任务、记忆等尚需实现或验收。
+本项目尚不是 Android Mika 全功能的逐项移植。两台实体 iPhone 的联调、手机重启后的本机执行器恢复、重签更新流程、Clash Mi 全部订阅/节点管理界面，以及 iOS 的文件沙箱、定时任务、记忆等尚需实现或验收。
 
 iPhone 本机控制需要设备解锁、开发者模式、有效执行器签名、本地开发连接和开发支持。会话按前台操作与短暂切换设计，不承诺在锁屏或长期后台状态控制其他 App。付费或免费签名权限都不会绕过系统解锁和 App 本人验证。
 
@@ -54,3 +54,23 @@ iPhone 本机控制需要设备解锁、开发者模式、有效执行器签名�
 这是 iOS 原生适配：不会在桌面或任意其他 App 上绘制安卓式自由悬浮球，也不会通过画中画伪造视频来维持后台。实时活动不提供额外后台运行权限，显示和过期行为由系统管理。无灵动岛的机型可使用锁屏实时活动。
 
 已使用现有免费开发团队在 iPhone 15 Pro 真机签名、安装并验证：输入卡片、拖动、显示开关、底层触摸透传、回桌面长按灵动岛、系统按钮回调及结束确认。另有四项测试覆盖本机请求取消、旧按钮不能停止新任务、远程任务恢复及提交超时不重发。证据见 `ios/evidence/capsule-acceptance.json`，截图见 `ios/evidence/capsule-app.png`。
+
+## iPhone 接收远程协助
+
+新增 iOS 受控端：另一台客户端经公网中继提交任务，由受控 iPhone 自己的模型和本机执行器操作 App。接收端需要先完成本机控制配置和模型设置，然后在「设置 → 接收远程协助」导入 `agent.json`，主动开启连接。接收默认关闭，重开 App 不会自动开启；页面、主页提示条和胶囊显示状态，均可停止后续操作。不要把受控端令牌分享给控制端。
+
+控制端在「连接设备 / 手机操作」导入 `client.json`，选择「远程 iPhone」和 HTTPS 中继。控制端无需取得受控手机的模型 API Key。生成配置文件：
+
+```sh
+python3 relay/server.py --config .local/relay.json --create-device myiphone --platform ios
+python3 relay/export_pairing.py --config .local/relay.json --device myiphone \
+  --relay https://qinziduihua.com/mika-rea --output .local/pairing/myiphone
+```
+
+新设备配对还需合并到服务器私有配置并重启中继。导出的两个文件分别交给对应设备，文件包含连接凭据，不要提交 Git、公开链接或发到聊天中。
+
+受控端一次执行一项任务，任务记录和会话保存在本机。带 `request_id` 的重复提交返回原任务；同编号不同内容被拒绝。进程中断后的任务标记失败，不自动重放，控制端可查看已有任务并接回结果。会话继续可提交同一 `conversation` 的后续任务；当前尚没有结构化 `waiting_for_answer` / `mika_answer` 追问交接。
+
+2026-10-31 联调通过：iOS 模拟器客户端 → `qinziduihua.com/mika-rea` → iPhone 15 Pro 真机执行器，读回 Clash Mi 1.0.31.1703 和 iOS 26.6.2；从控制端胶囊停止另一项任务，真机记录确认已取消。运行期间受控手机的胶囊和灵动岛均显示运行状态。另有三项受控任务测试与四项既有恢复/取消测试通过。证据见 `ios/evidence/remote-ios-acceptance.json`。
+
+这项验收没有覆盖两台实体 iPhone、真实跨省网络、锁屏或长期后台执行。受控手机需保持解锁、Mika 前台及本机隧道可用；切到目标 App 是短暂执行步骤，完成后返回 Mika。实时活动不授予后台执行权限，也不能替代本机隧道。

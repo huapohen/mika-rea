@@ -8,6 +8,7 @@ extension Color {
 struct ContentView: View {
     @StateObject private var model = Model()
     @ObservedObject private var localControl = OnDeviceControl.shared
+    @ObservedObject private var receiver = RemoteIOSReceiver.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var input = ""
     @State private var drawer = false
@@ -28,10 +29,13 @@ struct ContentView: View {
                 VStack(spacing:0) {
                     HStack(spacing:8) {
                         Circle().fill(model.mode == "安卓" ? Color.mikaBlue : Color.green).frame(width:6,height:6)
-                        Text(model.remoteTask?.connection.label ?? (model.mode == "安卓" ? "安卓 Mika · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手"))).font(.caption).foregroundStyle(.secondary)
+                        Text(model.remoteTask?.connection.label ?? (model.isRemote ? "\(model.targetLabel) · \(model.transport)" : (localControl.ready ? "iPhone · 本机控制已连接" : "iPhone · 本机助手"))).font(.caption).foregroundStyle(.secondary)
                         Spacer()
-                        Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" } } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备").disabled(model.busy || !model.taskID.isEmpty)
+                        Menu { Button("iPhone 本机助手") { model.mode="iPhone" }; Button("安卓远程助手") { model.mode="安卓" };Button("远程 iPhone 助手") {model.mode="远程 iPhone";model.transport="中继"} } label: { Image(systemName:"chevron.down").font(.caption).frame(width:32,height:32) }.accessibilityLabel("选择运行设备").disabled(model.receivingRemoteWork || model.busy || !model.taskID.isEmpty)
                     }.padding(.horizontal,22)
+                    if receiver.enabled || receiver.activeTask != nil {
+                        Button {destination="接收远程协助"} label: {HStack {Image(systemName:"iphone.radiowaves.left.and.right");Text(receiver.activeTask == nil ? receiver.status : "正在执行配对设备的任务，点此查看或停止").font(.caption);Spacer();Image(systemName:"chevron.right")}.padding(12)}.background(Color.orange.opacity(0.1)).accessibilityIdentifier("iosReceiverBanner")
+                    }
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(alignment:.leading,spacing:18) {
@@ -54,7 +58,7 @@ struct ContentView: View {
                     .navigationTitle("Mika").navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement:.navigationBarLeading) { Button { focused=false; withAnimation(.easeOut(duration:0.2)) { drawer=true } } label: { Image(systemName:"line.3.horizontal").frame(width:40,height:40) }.accessibilityLabel("菜单") }
-                        ToolbarItem(placement:.navigationBarTrailing) { Button { model.newChat();input="" } label: { Image(systemName:"square.and.pencil").frame(width:40,height:40) }.accessibilityLabel("新对话").disabled(model.busy || !model.taskID.isEmpty) }
+                        ToolbarItem(placement:.navigationBarTrailing) { Button { model.newChat();input="" } label: { Image(systemName:"square.and.pencil").frame(width:40,height:40) }.accessibilityLabel("新对话").disabled(model.receivingRemoteWork || model.busy || !model.taskID.isEmpty) }
                     }
             }
             if drawer {
@@ -62,23 +66,35 @@ struct ContentView: View {
                 sidebar.frame(width:300).background(Color(uiColor:.systemBackground)).transition(.move(edge:.leading))
             }
         }.tint(.mikaBlue)
-            .onAppear {MikaCapsuleCoordinator.shared.bind(model)}
-            .onChange(of:scenePhase) {phase in MikaCapsuleCoordinator.shared.setForeground(phase == .active)}
+            .onAppear {receiver.bind(model);MikaCapsuleCoordinator.shared.bind(model)}
+            .onChange(of:scenePhase) {phase in MikaCapsuleCoordinator.shared.setForeground(phase == .active);receiver.setForeground(phase == .active)}
             .onReceive(NotificationCenter.default.publisher(for:.mikaCapsuleRoute)) {notification in
                 drawer=false
-                switch notification.object as? String {case "capsule":destination="悬浮胶囊";case "local":destination="本机控制";default:destination=nil}
+                switch notification.object as? String {case "capsule":destination="悬浮胶囊";case "local":destination="本机控制";case "receiver":destination="接收远程协助";default:destination=receiver.activeTask == nil ? nil : "接收远程协助"}
             }
             .onOpenURL {url in if url.scheme=="mikarea" {MikaCapsuleCoordinator.shared.route(url.host ?? "task")}}
             .confirmationDialog("解除任务关联",isPresented:$detachingTask,titleVisibility:.visible) {
                 Button("仅解除本机关联",role:.destructive) {model.detachTask()}
             } message:{Text("目标设备上的任务可能继续执行。你可以在连接页查看并接回任务。")}
             .task {
-                MikaCapsuleCoordinator.shared.bind(model)
+                receiver.bind(model);MikaCapsuleCoordinator.shared.bind(model)
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--mika-capsule-live-preview") {MikaCapsuleCoordinator.shared.preview()}
                 #endif
                 await localControl.runDeveloperProbeIfRequested()
                 #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--mika-ios-receiver-start"),localControl.ready {do {try receiver.start()} catch {model.localError=error.localizedDescription}}
+                if ProcessInfo.processInfo.arguments.contains("--mika-remote-ios-probe") || ProcessInfo.processInfo.arguments.contains("--mika-remote-ios-recover-probe") {
+                    model.mode="远程 iPhone";model.transport="中继";model.newChat()
+                    let args=ProcessInfo.processInfo.arguments
+                    let index=args.firstIndex(of:"--mika-agent-goal")
+                    let goal=index.flatMap {$0+1<args.count ? args[$0+1] : nil} ?? "打开设置，只读取 iOS 版本并返回 Mika，不要更改设置。"
+                    if let index=args.firstIndex(of:"--mika-recover-task"),index+1<args.count {await model.adoptRemoteTask(args[index+1])}
+                    else {await model.send(goal)}
+                    let value:[String:Any]=["mode":model.mode,"outcome":model.lastOutcome,"active_task":model.taskID,"reply":model.messages.last?.text ?? "","timestamp":ISO8601DateFormatter().string(from:Date())]
+                    let url=FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("RemoteIOSAcceptance.json")
+                    if let data=try? JSONSerialization.data(withJSONObject:value,options:[.sortedKeys]) {try? data.write(to:url,options:[.atomic,.completeFileProtectionUntilFirstUserAuthentication])}
+                }
                 if localControl.ready,ProcessInfo.processInfo.arguments.contains("--mika-local-agent-probe") {
                     model.mode="iPhone";model.newChat()
                     let arguments=ProcessInfo.processInfo.arguments
@@ -137,13 +153,13 @@ struct ContentView: View {
     }
     private var sidebar: some View {
         VStack(alignment:.leading,spacing:8) {
-            HStack { Image(systemName:"sparkle").font(.title); VStack(alignment:.leading) {Text("Mika").font(.title2.bold());Text(model.mode == "安卓" ? "安卓远程助手" : "iPhone 助手").font(.caption).foregroundStyle(.secondary)};Spacer() }.padding(22)
+            HStack { Image(systemName:"sparkle").font(.title); VStack(alignment:.leading) {Text("Mika").font(.title2.bold());Text(model.targetLabel+"助手").font(.caption).foregroundStyle(.secondary)};Spacer() }.padding(22)
             sideButton("新对话","square.and.pencil") { model.newChat();drawer=false }
             sideButton("浏览器","globe") {open("浏览器")}
             sideButton("连接设备","iphone.radiowaves.left.and.right") {open("连接设备")}
             Divider().padding(.vertical,10)
             Text("最近对话").font(.caption).foregroundStyle(.secondary).padding(.horizontal,22)
-            ScrollView { VStack(spacing:2) {ForEach(model.chats) { chat in Button {model.selectChat(chat.id);drawer=false} label: {Text(chat.title).lineLimit(1).frame(maxWidth:.infinity,alignment:.leading).padding(14).foregroundStyle(.primary)}.disabled(model.busy || !model.taskID.isEmpty)} }.padding(.horizontal,8) }
+            ScrollView { VStack(spacing:2) {ForEach(model.chats) { chat in Button {model.selectChat(chat.id);drawer=false} label: {Text(chat.title).lineLimit(1).frame(maxWidth:.infinity,alignment:.leading).padding(14).foregroundStyle(.primary)}.disabled(model.receivingRemoteWork || model.busy || !model.taskID.isEmpty)} }.padding(.horizontal,8) }
             sideButton("设置","gearshape") {open("设置")}
             sideButton("关于 Mika","info.circle") {open("关于 Mika")}
         }.padding(.vertical,10)
@@ -155,6 +171,7 @@ struct ContentView: View {
         case "设置": SettingsHome(model:model)
         case "悬浮胶囊": CapsuleSettings()
         case "本机控制": LocalControlSetup()
+        case "接收远程协助": IOSReceiverSettings()
         case "连接设备": ConnectionSettings(model:model)
         case "浏览器": BrowserView(model:model)
         default: List {Section {Text("Mika").font(.largeTitle.bold());Text("iPhone 伴侣 · 开发版");Text("基于 Mika 实现原生对话、iPhone 本机控制与安卓远程任务。本地隧道基于 LocalDevVPN；合并代理使用 Mihomo 内核，并参考 Clash Mi。")};Section("项目") {Link("Mika 源码",destination:URL(string:"https://github.com/wangzan101/Mika")!);Link("REA",destination:URL(string:"https://github.com/morluto/rea")!);Link("Clash Mi（GPL-3.0）",destination:URL(string:"https://github.com/KaringX/clashmi")!);Link("Mihomo 内核（GPL-3.0）",destination:URL(string:"https://github.com/MetaCubeX/mihomo/tree/Meta")!);Link("本地隧道参考：LocalDevVPN（SideStore Team）",destination:URL(string:"https://github.com/jkcoxson/LocalDevVPN")!)} }.navigationTitle("关于 Mika")

@@ -1,17 +1,19 @@
 import SwiftUI
+import UniformTypeIdentifiers
 struct SettingsHome: View {
     @ObservedObject var model: Model
     @ObservedObject private var capsule=MikaCapsuleCoordinator.shared
     var body: some View {
         List {
             Section {
-                HStack(spacing:14) { Image(systemName:model.mode == "安卓" ? "iphone.radiowaves.left.and.right" : "sparkles").font(.title2).foregroundStyle(Color.mikaBlue); VStack(alignment:.leading,spacing:5) {Text(model.mode == "安卓" ? "安卓远程助手" : "iPhone 本机助手").font(.headline);Text(model.busy ? "正在执行任务" : "按需配置模型与连接设备").font(.caption).foregroundStyle(.secondary)} }
+                HStack(spacing:14) { Image(systemName:model.mode == "安卓" ? "iphone.radiowaves.left.and.right" : "sparkles").font(.title2).foregroundStyle(Color.mikaBlue); VStack(alignment:.leading,spacing:5) {Text(model.targetLabel+"助手").font(.headline);Text(model.busy ? "正在执行任务" : "按需配置模型与连接设备").font(.caption).foregroundStyle(.secondary)} }
             }
             Section("基本") {
                 NavigationLink { LocalControlSetup() } label: { setting("本机控制","hand.tap",OnDeviceControl.shared.phase) }.accessibilityIdentifier("settingsLocalControl")
+                NavigationLink { IOSReceiverSettings() } label: {setting("接收远程协助","iphone.radiowaves.left.and.right",RemoteIOSReceiver.shared.enabled ? "已开启" : "关闭")}.accessibilityIdentifier("settingsIOSReceiver")
                 NavigationLink { CapsuleSettings() } label: { setting("悬浮胶囊","bubble.left.and.bubble.right",capsule.mode=="off" ? "关闭" : "已开启") }.accessibilityIdentifier("settingsCapsule")
                 NavigationLink { ModelSettings(model:model) } label: { setting("模型","cpu",model.model) }.accessibilityIdentifier("settingsModels")
-                NavigationLink { ConnectionSettings(model:model) } label: { setting("手机操作","iphone",model.mode == "安卓" ? model.transport : "本机助手") }
+                NavigationLink { ConnectionSettings(model:model) } label: { setting("手机操作","iphone",model.isRemote ? model.transport : "本机助手") }
                 NavigationLink { BrowserView(model:model) } label: { setting("浏览器","globe","") }
             }
             Section("隐私与数据") {
@@ -40,7 +42,7 @@ struct ModelSettings: View {
                 Button {Task {await test()}} label: {HStack {Text(testing ? "正在测试…" : "测试连接");Spacer();if testing {ProgressView()}}}.disabled(testing || model.apiKey.isEmpty)
                 if !status.isEmpty {Text(status).font(.footnote)}
             } footer: {Text("配置自动保存，API Key 加密存放在本机钥匙串。测试连接只获取模型列表，不产生聊天任务。")}
-        }.disabled(model.busy).navigationTitle("模型").navigationBarTitleDisplayMode(.inline)
+        }.disabled(model.busy || model.receivingRemoteWork).navigationTitle("模型").navigationBarTitleDisplayMode(.inline)
     }
     private func test() async {
         testing=true;defer {testing=false}
@@ -51,12 +53,16 @@ struct ConnectionSettings: View {
     @ObservedObject var model: Model
     @State private var status=""
     @State private var testing=false
+    @State private var importing=false
+    @State private var importError=""
     var body: some View {
         Form {
-            Section("运行位置") {Picker("助手",selection:$model.mode) {Text("iPhone 本机").tag("iPhone");Text("安卓 Mika").tag("安卓")}.pickerStyle(.segmented);Text("iPhone 本机支持聊天和阅读内容。安卓助手可通过 Mika 操作目标手机。").font(.footnote).foregroundStyle(.secondary)}
-            Section("连接方式") {Picker("连接方式",selection:$model.transport) {Text("同一网络直连").tag("直连");Text("公网中继").tag("中继")}.pickerStyle(.segmented)}
+            Section("运行位置") {Picker("助手",selection:$model.mode) {Text("iPhone 本机").tag("iPhone");Text("安卓 Mika").tag("安卓");Text("远程 iPhone").tag("远程 iPhone")}.pickerStyle(.segmented);Text("本机操作需开启本机控制。远程 iPhone 需由目标手机开启接收远程协助，并保持解锁及 Mika 前台。").font(.footnote).foregroundStyle(.secondary)}
+            Section {Button("导入控制端配对配置") {importing=true};if !importError.isEmpty {Text(importError).foregroundStyle(.red).font(.footnote)}}
+            if model.mode=="远程 iPhone" {Section("连接方式") {Text("公网 HTTPS 中继")}}
+            else {Section("连接方式") {Picker("连接方式",selection:$model.transport) {Text("同一网络直连").tag("直连");Text("公网中继").tag("中继")}.pickerStyle(.segmented)}}
             if model.transport == "中继" {
-                Section {TextField("HTTPS 中继地址",text:$model.relayURL).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL);TextField("设备 ID",text:$model.deviceID).textInputAutocapitalization(.never).autocorrectionDisabled();SecureField("控制端配对令牌",text:$model.relayToken).textInputAutocapitalization(.never).autocorrectionDisabled()} header: {Text("公网中继")} footer: {Text("安卓端开启 Mika 远程连接，并配对同一个设备 ID。公网须使用 HTTPS。")}
+                Section {TextField("HTTPS 中继地址",text:$model.relayURL).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL);TextField("设备 ID",text:$model.deviceID).textInputAutocapitalization(.never).autocorrectionDisabled();SecureField("控制端配对令牌",text:$model.relayToken).textInputAutocapitalization(.never).autocorrectionDisabled()} header: {Text("公网中继")} footer: {Text("目标端开启远程连接，并配对同一个设备 ID。iPhone 受控端使用「接收远程协助」。公网须使用 HTTPS。")}
             } else {
                 Section {TextField("MCP 地址",text:$model.mcp).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL);SecureField("访问令牌",text:$model.token).textInputAutocapitalization(.never).autocorrectionDisabled()} header: {Text("安卓 Mika MCP")} footer: {Text("在安卓 Mika 设置 → 电脑连接（MCP）中开启 Wi-Fi 和私有网络，填写显示的地址和令牌。")}
             }
@@ -75,6 +81,10 @@ struct ConnectionSettings: View {
                     }
                 }
             }
-        }.disabled(model.busy).navigationTitle("手机操作").navigationBarTitleDisplayMode(.inline)
+        }.disabled(model.busy || model.receivingRemoteWork).navigationTitle("手机操作").navigationBarTitleDisplayMode(.inline)
+            .onChange(of:model.mode) {mode in if mode=="远程 iPhone" {model.transport="中继"}}
+            .fileImporter(isPresented:$importing,allowedContentTypes:[.json,.data]) {result in
+                do {let url=try result.get();let access=url.startAccessingSecurityScopedResource();defer {if access {url.stopAccessingSecurityScopedResource()}};try model.importControllerConfiguration(Data(contentsOf:url));importError=""} catch {importError=error.localizedDescription}
+            }
     }
 }

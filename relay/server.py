@@ -1,5 +1,5 @@
 """Mika outbound relay. Run behind TLS (Caddy); no API/model keys required."""
-import argparse, hmac, json, queue, secrets, threading, time
+import argparse, hmac, json, queue, re, secrets, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -85,16 +85,22 @@ class Handler(BaseHTTPRequestHandler):
         except Exception: self.send_json(500,{'error':'Internal relay error'})
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument('--config',required=True); p.add_argument('--host',default='127.0.0.1'); p.add_argument('--port',type=int,default=8787); p.add_argument('--create-device'); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--config',required=True); p.add_argument('--host',default='127.0.0.1'); p.add_argument('--port',type=int,default=8787); p.add_argument('--create-device'); p.add_argument('--platform',choices=('android','ios'),default='android'); a=p.parse_args()
     path=Path(a.config)
     if a.create_device:
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,64}',a.create_device): p.error('Invalid device ID')
         cfg=json.loads(path.read_text()) if path.exists() else {'devices':{}}
         if a.create_device in cfg['devices']: p.error('Device already exists; refusing to replace pairing')
-        cfg['devices'][a.create_device]={'platform':'android','client_token':secrets.token_urlsafe(32),'agent_token':secrets.token_urlsafe(32)}
+        cfg['devices'][a.create_device]={'platform':a.platform,'client_token':secrets.token_urlsafe(32),'agent_token':secrets.token_urlsafe(32)}
         path.parent.mkdir(parents=True,exist_ok=True)
-        import os
-        fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_TRUNC,0o600)
-        with os.fdopen(fd,'w') as out: json.dump(cfg,out)
+        import os, tempfile
+        fd,temporary=tempfile.mkstemp(prefix='.'+path.name+'-',dir=path.parent)
+        try:
+            with os.fdopen(fd,'w') as out:
+                json.dump(cfg,out);out.flush();os.fsync(out.fileno())
+            os.replace(temporary,path)
+        finally:
+            if os.path.exists(temporary): os.unlink(temporary)
         print('Pairing created; credentials written to configuration file (not printed).'); return
     server=ThreadingHTTPServer((a.host,a.port),Handler); server.relay=Relay(json.loads(path.read_text())['devices']); server.daemon_threads=True
     print('Mika relay listening',flush=True); server.serve_forever()

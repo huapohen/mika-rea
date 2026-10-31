@@ -1,0 +1,37 @@
+import Foundation
+import Combine
+
+private final class ReceiverMemoryCredentials:CredentialStore {
+    private var values:[String:String]=[:]
+    func get(_ key:String)->String {values[key] ?? ""}
+    func set(_ key:String,_ value:String)->Bool {values[key]=value;return true}
+}
+@MainActor final class IOSLocalPhoneWorker:IOSPhoneWorker {
+    weak var owner:Model?
+    private(set) var model:Model?
+    var progressHandler:((String)->Void)?
+    private var observer:AnyCancellable?
+    private var stopping=false
+    var available:Bool {
+        guard let owner else {return false}
+        return OnDeviceControl.shared.ready && !owner.busy && owner.remoteTask==nil && !owner.apiKey.isEmpty
+    }
+    func execute(goal:String,conversation:String) async throws -> String {
+        guard let owner,OnDeviceControl.shared.ready else {throw IOSReceiverTasks.ReceiverIssue("本机执行器未就绪")}
+        stopping=false
+        let directory=FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("RemoteAssistance/Threads/"+conversation)
+        try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
+        let defaults=UserDefaults(suiteName:"com.huapohen.mikaremote.receiver."+conversation)!
+        let engine=Model(storage:directory,defaults:defaults,vault:ReceiverMemoryCredentials(),providerSession:owner.providerSession)
+        engine.mode="iPhone";engine.base=owner.base;engine.model=owner.model;engine.apiKey=owner.apiKey
+        model=engine
+        observer=engine.objectWillChange.sink { [weak self,weak engine] in Task { @MainActor in self?.progressHandler?(engine?.localProgress ?? "正在执行") }}
+        defer {observer=nil;model=nil}
+        await engine.send(goal)
+        if engine.lastOutcome=="cancelled" || stopping {throw CancellationError()}
+        guard engine.lastOutcome=="done" else {throw IOSReceiverTasks.ReceiverIssue("本机任务未完成，请在受控手机上检查")}
+        let answer=engine.messages.last(where:{$0.role=="assistant"})?.text ?? ""
+        return owner.apiKey.isEmpty ? answer : answer.replacingOccurrences(of:owner.apiKey,with:"***")
+    }
+    func cancel() async {stopping=true;if let model {await model.stopWork(expectedID:model.capsuleOperationID)}}
+}
