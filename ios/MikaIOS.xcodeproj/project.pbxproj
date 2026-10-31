@@ -1,0 +1,418 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */; };
+		5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA7737935650160E9074D2C /* ContentView.swift */; };
+		BD435E741A907984B88A8C15 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A933D9593A6437B6F840205 /* SettingsView.swift */; };
+		D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F484000F83A498BEFACD5A7C /* BrowserView.swift */; };
+		D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80664ECF799D8E00D9FFB99 /* Model.swift */; };
+		F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD1BC73166688166B30AD8A /* MikaIOS.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B2C01AAE2B251AC03CF4C9A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 78F747EE28E72F9C09EF3D19 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F35629DC352BDFA7A5C48925;
+			remoteInfo = MikaIOS;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0DA7737935650160E9074D2C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4A933D9593A6437B6F840205 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceControlTests.swift; sourceTree = "<group>"; };
+		682FDFA64E43727CB37D3529 /* MikaIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MikaIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DD1BC73166688166B30AD8A /* MikaIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MikaIOS.swift; sourceTree = "<group>"; };
+		A171E7F91F76B55193D8ACE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DeviceControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E80664ECF799D8E00D9FFB99 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		F484000F83A498BEFACD5A7C /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		15B745F43DAE8A97A408B788 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */,
+				682FDFA64E43727CB37D3529 /* MikaIOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		31F664D9BFCCFE143086FF62 = {
+			isa = PBXGroup;
+			children = (
+				F4464F981BDDDC9B030640F7 /* DeviceControlTests */,
+				D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */,
+				15B745F43DAE8A97A408B788 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D19D8F4F0B47FC6CDBE2B5BA /* MikaIOS */ = {
+			isa = PBXGroup;
+			children = (
+				F484000F83A498BEFACD5A7C /* BrowserView.swift */,
+				0DA7737935650160E9074D2C /* ContentView.swift */,
+				A171E7F91F76B55193D8ACE1 /* Info.plist */,
+				6DD1BC73166688166B30AD8A /* MikaIOS.swift */,
+				E80664ECF799D8E00D9FFB99 /* Model.swift */,
+				4A933D9593A6437B6F840205 /* SettingsView.swift */,
+			);
+			path = MikaIOS;
+			sourceTree = "<group>";
+		};
+		F4464F981BDDDC9B030640F7 /* DeviceControlTests */ = {
+			isa = PBXGroup;
+			children = (
+				54B8622A4915784883C4DDB8 /* DeviceControlTests.swift */,
+			);
+			path = DeviceControlTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CF6BB9B2A23992E7F43F187B /* DeviceControlTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3796DF808716E1689B4C8486 /* Build configuration list for PBXNativeTarget "DeviceControlTests" */;
+			buildPhases = (
+				D93C350926581CEB1017215C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B5721F2FA2E91B4FD7BEB3B1 /* PBXTargetDependency */,
+			);
+			name = DeviceControlTests;
+			packageProductDependencies = (
+			);
+			productName = DeviceControlTests;
+			productReference = D1723ECF1BEEF7B6ECA3A647 /* DeviceControlTests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		F35629DC352BDFA7A5C48925 /* MikaIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11D4E9C941E56865FB647E3F /* Build configuration list for PBXNativeTarget "MikaIOS" */;
+			buildPhases = (
+				8D17DB8DC88DD90E9ACF46AE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MikaIOS;
+			packageProductDependencies = (
+			);
+			productName = MikaIOS;
+			productReference = 682FDFA64E43727CB37D3529 /* MikaIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		78F747EE28E72F9C09EF3D19 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					CF6BB9B2A23992E7F43F187B = {
+						DevelopmentTeam = RQHK3ZN3W7;
+						ProvisioningStyle = Automatic;
+						TestTargetID = F35629DC352BDFA7A5C48925;
+					};
+					F35629DC352BDFA7A5C48925 = {
+						DevelopmentTeam = RQHK3ZN3W7;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 89B4939AC1B11A797C45D15E /* Build configuration list for PBXProject "MikaIOS" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 31F664D9BFCCFE143086FF62;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 15B745F43DAE8A97A408B788 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F35629DC352BDFA7A5C48925 /* MikaIOS */,
+				CF6BB9B2A23992E7F43F187B /* DeviceControlTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D17DB8DC88DD90E9ACF46AE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2281772DE0C729B5689A11A /* BrowserView.swift in Sources */,
+				5E0EDB19ED1C644C8412C5DA /* ContentView.swift in Sources */,
+				F5086BE67FF56605E2FAC16A /* MikaIOS.swift in Sources */,
+				D66D12D30DDB3DB32ED004E8 /* Model.swift in Sources */,
+				BD435E741A907984B88A8C15 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D93C350926581CEB1017215C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D509AC084C7BEBEC6335180 /* DeviceControlTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B5721F2FA2E91B4FD7BEB3B1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F35629DC352BDFA7A5C48925 /* MikaIOS */;
+			targetProxy = B2C01AAE2B251AC03CF4C9A3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		10B180A74A04C71C17770CF3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				INFOPLIST_FILE = MikaIOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		320B71DF3A3606EFE84AA41E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.huapohen.mikaremote.device-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MikaIOS;
+			};
+			name = Release;
+		};
+		7B36CC9C668E43FB7261CEB4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.huapohen.mikaremote.device-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MikaIOS;
+			};
+			name = Debug;
+		};
+		8E0FFBF32BB5F3D8C61AD43C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		92BF5968F09476077B444EF6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F540C1E938CB367925BC79AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RQHK3ZN3W7;
+				INFOPLIST_FILE = MikaIOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.huapohen.mikaremote;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11D4E9C941E56865FB647E3F /* Build configuration list for PBXNativeTarget "MikaIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10B180A74A04C71C17770CF3 /* Debug */,
+				F540C1E938CB367925BC79AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3796DF808716E1689B4C8486 /* Build configuration list for PBXNativeTarget "DeviceControlTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B36CC9C668E43FB7261CEB4 /* Debug */,
+				320B71DF3A3606EFE84AA41E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		89B4939AC1B11A797C45D15E /* Build configuration list for PBXProject "MikaIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E0FFBF32BB5F3D8C61AD43C /* Debug */,
+				92BF5968F09476077B444EF6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 78F747EE28E72F9C09EF3D19 /* Project object */;
+}

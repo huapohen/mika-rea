@@ -1,0 +1,50 @@
+name: MikaIOS
+options:
+  bundleIdPrefix: com.huapohen
+  deploymentTarget:
+    iOS: '16.0'
+targets:
+  MikaIOS:
+    type: application
+    platform: iOS
+    sources: [MikaIOS]
+    info:
+      path: MikaIOS/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        CFBundleDisplayName: Mika
+        NSLocalNetworkUsageDescription: 连接局域网中的 Mika 安卓设备。
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote
+        DEVELOPMENT_TEAM: RQHK3ZN3W7
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: '5.0'
+  DeviceControlTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DeviceControlTests]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.huapohen.mikaremote.device-tests
+        DEVELOPMENT_TEAM: RQHK3ZN3W7
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: MikaIOS
+    dependencies:
+      - target: MikaIOS
+schemes:
+  MikaIOS:
+    build:
+      targets:
+        MikaIOS: all
+  DeviceControl:
+    build:
+      targets:
+        MikaIOS: all
+        DeviceControlTests: [test]
+    test:
+      targets: [DeviceControlTests]

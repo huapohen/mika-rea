@@ -16,3 +16,19 @@ dist/
 
 # 给 AI 编程助手的本地规则,只留在本机
 CLAUDE.md
+
+# Local pairing credentials and build output
+.local/
+android-bridge/build/
+relay/__pycache__/
+
+# Device-local credentials, Xcode state, archives
+.env
+.env.*
+*.mobileprovision
+*.p12
+*.p8
+*.pem
+*.ipa
+**/xcuserdata/
+*.xcuserstate

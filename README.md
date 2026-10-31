@@ -1,3 +1,20 @@
+# Mika REA
+
+基于 [wangzan101/Mika](https://github.com/wangzan101/Mika) 开发的 iPhone 伴侣、安卓远程连接助手和中继服务。参考 [morluto/rea](https://github.com/morluto/rea) 的能力调查方法。原项目的 Apache-2.0 许可及第三方声明保留在仓库中。
+
+- `ios/`：SwiftUI iPhone 客户端，包含对话、浏览器、模型设置、设备连接设置及 UI 测试。
+- `android-bridge/`：独立安卓连接助手，通过出站请求连接中继并转交给官方 Mika MCP。
+- `relay/`：带设备与控制端令牌鉴权的中继服务原型。
+- `app/`、`core/`：上游 Mika Android 项目源码。
+
+当前状态：iPhone 主要界面已在 iPhone 15 Pro 真机测试和安装。中继端到端测试尚未通过，公网部署未完成；不支持脱离 Mac 后对 iOS 任意第三方 App 的全局控制。详细功能和限制见 [iOS 说明](ios/README.md)。
+
+本机配对配置、API Key、令牌与构建产物不纳入版本管理。
+
+---
+
+以下为上游 Mika 的原始说明：
+
 <div align="center">
 
 <img src="docs/media/logo.png" alt="Mika" width="120" />
